@@ -1,0 +1,336 @@
+
+
+
+
+Global Routing Operations                                     P. Lucente
+Internet-Draft                                                       NTT
+Updates: 7854 (if approved)                              4 November 2024
+Intended status: Standards Track                                        
+Expires: 8 May 2025
+
+
+                       Making BMP fruible offline
+                   draft-lucente-grow-bmp-offline-00
+
+Abstract
+
+   BMP (BGP Monitoring Protocol) [RFC7854] is perfectly suited for real-
+   time consumption but less ideal for off-wire historical purposes.
+   The main issue is the dependence that parsing BGP Update PDUs has on
+   knowing which capabilities have been agreed when establishing the BGP
+   session with the peers, which could have happened long time ago
+   (days, weeks, months).
+
+   This document defines a new optional BMP message type, called Peer
+   Summary, that carries a summary of the established BGP sessions along
+   with their capabilities and that is intended to be injected in the
+   BMP feed at configurable time intervals and/or ad-hoc whenever it is
+   felt necessary to improve fruition of BMP data offline.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 8 May 2025.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 1]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Peer Summary message format . . . . . . . . . . . . . . . . .   3
+     3.1.  Third party off-wire encoding formats . . . . . . . . . .   4
+   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   4
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   6
+
+1.  Introduction
+
+   Correctly parsing BGP Update PDUs included in BMP messages (ie.
+   Route Monitoring) does require a stateful approach by keeping track
+   of capabilities exchanged at BGP Open time as reported by BMP Peer Up
+   messages.
+
+   The role of Peer Up messages is solely BGP session event logging and
+   the long-lived nature of sessions does pose the problem that a BGP
+   Open message may have been received long time before parsing a BGP
+   Update making challenging a stateful approach based on receipt of
+   Peer Up.
+
+   TLV support for BMP Route Monitoring and Peer Down Messages
+   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
+   including relevant capabilities that have an impact in BGP Update
+   message parsing as part of optional informational TLV in Route
+   Monitoring messages.  While the method is valid, in fact it does
+   allow with minor effort to encapsulate BMP in MRT format for offline
+   consumption as documented by Storing BMP messages in MRT Format
+   [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
+   verbosity and increased correlation effort at a BMP exporter.
+
+   This document defines a new optional BMP message type named Peer
+   Summary that carries a list of the established BGP sessions, along
+   with their capabilities.  The general idea is that a Peer Summary
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 2]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
+   message is composed by a sequence of one or multiple Peer TLVs with
+   the goal of allowing a consumer to re-build the list of established
+   BGP sessions like if the sequence of Peer Up messages was just being
+   received live by a BMP exporter.
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 RFC 2119 [RFC2119] RFC 8174 [RFC8174] when, and only when, they
+   appear in all capitals, as shown here.
+
+3.  Peer Summary message format
+
+   The Peer Summary message starts with a BMP Common Header as defined
+   in Section 4.1 of [RFC7854] then followed by one or multiple Peer
+   TLVs with code-point TBD2.
+
+   Each Peer TLV is structured as a plain TLV as defined in Section 3 of
+   [I-D.ietf-grow-bmp-tlv].  The value part contains the BMP Common
+   Header and Peer Up Notification body as defined in Section 4.10 of
+   [RFC7854].
+
+   If the Peer Summary message is generated at a BMP station, it MUST
+   encapsulate only actually received Peer Up data from BMP exporters;
+   if it is generated at a BMP exporter, it MUST encapsulate all Peer Up
+   that have already been sent to the BMP station up to the time the
+   Peer Summary message is being crafted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 3]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+
+      |    Version    |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                        Message Length                         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |Msg Type = TBD1|
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      ~                       Peer TLV 3 .. N                         ~
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                                  Figure 1
+
+3.1.  Third party off-wire encoding formats
+
+   While this document does define a way to facilitate replay and more
+   in general consumption of raw BMP data offline, similar benefits may
+   be harnessed by third party off-wire formats, in which BMP can be
+   encapsulated into, for example MRT (Multi-Threaded Routing Toolkit)
+   as defined by RFC 6396 [RFC6396].  As a result of that, this document
+   does not recommend a preferred way to store BMP data offline.
+
+4.  Operational Considerations
+
+   The Peer Summary message injection in a BMP feed may be done by BMP
+   exporters.  But it could also be originated at a online BMP station
+   instead, for consumption by an offline BMP station.  The advantage of
+   creating summaries at the online BMP station is that it has awareness
+   of how offline data is being organized, for example if a new file is
+   created every five minutes it may make sense to include the summary
+   at the beginning of it.
+
+   A BMP station receiving both Peer Up and Peer Summary messages should
+   honor the intersection of all information received.  If information
+   about the same peer is received by multiple means, the latest should
+   be honored by looking at the timestamp in the Per-Peer header.
+
+
+
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 4]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
+5.  Security Considerations
+
+   It is not believed that this document adds any additional security
+   considerations.
+
+6.  IANA Considerations
+
+   IANA is asked to allocate a new Peer Summary message type in the BMP
+   Message Types registry with value TBD1.  IANA is also asked to to
+   create a registry within the BMP group, named "BMP Peer Summary
+   Message TLVs".
+
+   Registration procedures for this registry are:
+
+                +=============+==========================+
+                |    Range    | Registration Procedures  |
+                +=============+==========================+
+                |   0-32767   |     Standards Action     |
+                +-------------+--------------------------+
+                | 32768-65530 | First Come, First Served |
+                +-------------+--------------------------+
+                | 65531-65534 |       Experimental       |
+                +-------------+--------------------------+
+                |    65535    |         Reserved         |
+                +-------------+--------------------------+
+
+                                 Table 1
+
+   Initial values for this registry are:
+
+                  +======+=============+===============+
+                  | Type | Description |   Reference   |
+                  +======+=============+===============+
+                  | TBD2 |     Peer    | this document |
+                  +------+-------------+---------------+
+
+                                 Table 2
+
+7.  Normative References
+
+   [I-D.ietf-grow-bmp-tlv]
+              Lucente, P. and Y. Gu, "BMP v4: TLV support for BMP Route
+              Monitoring and Peer Down Messages", Work in Progress,
+              Internet-Draft, draft-ietf-grow-bmp-tlv-14, 18 March 2024,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
+              bmp-tlv-14>.
+
+
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 5]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
+   [I-D.petrie-grow-mrt-bmp]
+              Petrie, C., "Storing BMP messages in MRT Format", Work in
+              Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
+              November 2019, <https://datatracker.ietf.org/doc/html/
+              draft-petrie-grow-mrt-bmp-00>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC6396]  Blunk, L., Karir, M., and C. Labovitz, "Multi-Threaded
+              Routing Toolkit (MRT) Routing Information Export Format",
+              RFC 6396, DOI 10.17487/RFC6396, October 2011,
+              <https://www.rfc-editor.org/info/rfc6396>.
+
+   [RFC7854]  Scudder, J., Ed., Fernando, R., and S. Stuart, "BGP
+              Monitoring Protocol (BMP)", RFC 7854,
+              DOI 10.17487/RFC7854, June 2016,
+              <https://www.rfc-editor.org/info/rfc7854>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+Acknowledgements
+
+   TBD
+
+Author's Address
+
+   Paolo Lucente
+   NTT
+   Veemweg 23
+   3771 Barneveld
+   Netherlands
+   Email: paolo@ntt.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente                    Expires 8 May 2025                   [Page 6]
