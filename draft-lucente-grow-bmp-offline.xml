@@ -5,6 +5,7 @@
 	<!ENTITY RFC7854 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7854.xml">
 	<!ENTITY RFC6396 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6396.xml">
 	<!ENTITY I-D.ietf-grow-bmp-tlv SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-tlv.xml">
+	<!ENTITY I-D.ietf-grow-bmp-rel SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-rel.xml">
 	<!ENTITY I-D.petrie-grow-mrt-bmp SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.petrie-grow-mrt-bmp.xml">
 	<!ENTITY IANA_PS_MSG_TYPE "TBD1">
 	<!ENTITY IANA_PS_CODE_PEER_TLV "TBD2">
@@ -41,6 +42,32 @@
                 <email>paolo@ntt.net</email>
             </address>
         </author>
+
+        <author fullname="Camilo Cardona" initials="C" surname="Cardona">
+          <organization>NTT</organization>
+            <address>
+              <postal>
+                <street>164-168, Carrer de Numancia</street>
+                <city>Barcelona</city>
+                <code>08029</code>
+                <country>Spain</country>
+              </postal>
+              <email>camilo@ntt.net</email>
+            </address>
+        </author>
+
+	<author fullname="Luuk Hendriks" initials="L." surname="Hendriks">
+	    <organization>NLnet Labs</organization>
+	    <address>
+	        <postal>
+	            <street>Science Park 400</street>
+	            <city>Amsterdam</city>
+	            <code>1098 XH</code>
+	            <country>Netherlands</country>
+	        </postal>
+	        <email>luuk@nlnetlabs.nl</email>
+	    </address>
+	</author>
 
         <date year="2024"/>
 
@@ -129,11 +156,8 @@
 		body as defined in <xref target="RFC7854">Section 4.10 of</xref>.
             </t>
             <t>
-		If the Peer Summary message is generated at a BMP station, it MUST
-		encapsulate only actually received Peer Up data from BMP exporters;
-		if it is generated at a BMP exporter, it MUST encapsulate all Peer
-		Up that have already been sent to the BMP station up to the time
-		the Peer Summary message is being crafted.
+		The Peer Summary message is generated at a BMP station, it MUST
+		encapsulate only actually received Peer Up data from BMP exporters.
             </t>
 	    <t>
             <figure anchor="BMP-Peer-Summary-format" align="center">
@@ -176,19 +200,21 @@
 
         <section title="Operational Considerations">
             <t>
-		The Peer Summary message injection in a BMP feed may be done by BMP
-		exporters. But it could also be originated at a online BMP station
-		instead, for consumption by an offline BMP station. The advantage of
-		creating summaries at the online BMP station is that it has awareness
-		of how offline data is being organized, for example if a new file is
-		created every five minutes it may make sense to include the summary
-		at the beginning of it.
+		The Peer Summary message injection in a BMP feed is done by an online
+		BMP station for consumption by an offline BMP station. The advantage of
+		creating summaries at the online BMP station (for example, as opposed
+		to creating them at a BMP exporter) is that it has awareness of how
+		offline data is being organized, for example if a new file is created
+		every five minutes it may make sense to include the summary at the
+		beginning of each file.  
             </t>
 	    <t>
-		A BMP station receiving both Peer Up and Peer Summary messages should
-		honor the intersection of all information received. If information
-		about the same peer is received by multiple means, the latest should
-		be honored by looking at the timestamp in the Per-Peer header. 
+		A BMP station receiving multiple Peer Up for the same peer should
+		perform state compression and include in the Peer Summary the last
+		one received, based on timestamp, at the time the summary is being
+		generated. In other words, the summary is not meant, for example if
+		a BGP session is flapping, as event reporting and this is left to
+		<xref target="I-D.ietf-grow-bmp-rel">BMP Route Event Logging</xref>.
 	    </t>
         </section>
         <section title="Security Considerations">
@@ -247,6 +273,7 @@
 		<?rfc include="reference.RFC.6396.xml"?>
 
 		&I-D.ietf-grow-bmp-tlv;
+		&I-D.ietf-grow-bmp-rel;
 		&I-D.petrie-grow-mrt-bmp;
         </references>
 

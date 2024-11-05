@@ -3,10 +3,11 @@
 
 
 Global Routing Operations                                     P. Lucente
-Internet-Draft                                                       NTT
-Updates: 7854 (if approved)                              4 November 2024
-Intended status: Standards Track                                        
-Expires: 8 May 2025
+Internet-Draft                                                C. Cardona
+Updates: 7854 (if approved)                                          NTT
+Intended status: Standards Track                             L. Hendriks
+Expires: 9 May 2025                                           NLnet Labs
+                                                         5 November 2024
 
 
                        Making BMP fruible offline
@@ -42,7 +43,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 May 2025.
+   This Internet-Draft will expire on 9 May 2025.
 
 Copyright Notice
 
@@ -52,8 +53,7 @@ Copyright Notice
 
 
 
-
-Lucente                    Expires 8 May 2025                   [Page 1]
+Lucente, et al.            Expires 9 May 2025                   [Page 1]
 
 Internet-Draft         Making BMP fruible offline          November 2024
 
@@ -74,11 +74,11 @@ Table of Contents
    3.  Peer Summary message format . . . . . . . . . . . . . . . . .   3
      3.1.  Third party off-wire encoding formats . . . . . . . . . .   4
    4.  Operational Considerations  . . . . . . . . . . . . . . . . .   4
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
    7.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   6
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
 1.  Introduction
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Lucente                    Expires 8 May 2025                   [Page 2]
+Lucente, et al.            Expires 9 May 2025                   [Page 2]
 
 Internet-Draft         Making BMP fruible offline          November 2024
 
@@ -138,36 +138,8 @@ Internet-Draft         Making BMP fruible offline          November 2024
    Header and Peer Up Notification body as defined in Section 4.10 of
    [RFC7854].
 
-   If the Peer Summary message is generated at a BMP station, it MUST
-   encapsulate only actually received Peer Up data from BMP exporters;
-   if it is generated at a BMP exporter, it MUST encapsulate all Peer Up
-   that have already been sent to the BMP station up to the time the
-   Peer Summary message is being crafted.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente                    Expires 8 May 2025                   [Page 3]
-
-Internet-Draft         Making BMP fruible offline          November 2024
+   The Peer Summary message is generated at a BMP station, it MUST
+   encapsulate only actually received Peer Up data from BMP exporters.
 
 
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -190,6 +162,14 @@ Internet-Draft         Making BMP fruible offline          November 2024
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
+
+
+
+Lucente, et al.            Expires 9 May 2025                   [Page 3]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
+
                                   Figure 1
 
 3.1.  Third party off-wire encoding formats
@@ -203,28 +183,20 @@ Internet-Draft         Making BMP fruible offline          November 2024
 
 4.  Operational Considerations
 
-   The Peer Summary message injection in a BMP feed may be done by BMP
-   exporters.  But it could also be originated at a online BMP station
-   instead, for consumption by an offline BMP station.  The advantage of
-   creating summaries at the online BMP station is that it has awareness
+   The Peer Summary message injection in a BMP feed is done by an online
+   BMP station for consumption by an offline BMP station.  The advantage
+   of creating summaries at the online BMP station (for example, as
+   opposed to creating them at a BMP exporter) is that it has awareness
    of how offline data is being organized, for example if a new file is
    created every five minutes it may make sense to include the summary
-   at the beginning of it.
+   at the beginning of each file.
 
-   A BMP station receiving both Peer Up and Peer Summary messages should
-   honor the intersection of all information received.  If information
-   about the same peer is received by multiple means, the latest should
-   be honored by looking at the timestamp in the Per-Peer header.
-
-
-
-
-
-
-Lucente                    Expires 8 May 2025                   [Page 4]
-
-Internet-Draft         Making BMP fruible offline          November 2024
-
+   A BMP station receiving multiple Peer Up for the same peer should
+   perform state compression and include in the Peer Summary the last
+   one received, based on timestamp, at the time the summary is being
+   generated.  In other words, the summary is not meant, for example if
+   a BGP session is flapping, as event reporting and this is left to BMP
+   Route Event Logging [I-D.ietf-grow-bmp-rel].
 
 5.  Security Considerations
 
@@ -239,6 +211,20 @@ Internet-Draft         Making BMP fruible offline          November 2024
    Message TLVs".
 
    Registration procedures for this registry are:
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.            Expires 9 May 2025                   [Page 4]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
@@ -266,6 +252,13 @@ Internet-Draft         Making BMP fruible offline          November 2024
 
 7.  Normative References
 
+   [I-D.ietf-grow-bmp-rel]
+              Lucente, P. and C. Cardona, "Logging of routing events in
+              BGP Monitoring Protocol (BMP)", Work in Progress,
+              Internet-Draft, draft-ietf-grow-bmp-rel-02, 8 July 2024,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
+              bmp-rel-02>.
+
    [I-D.ietf-grow-bmp-tlv]
               Lucente, P. and Y. Gu, "BMP v4: TLV support for BMP Route
               Monitoring and Peer Down Messages", Work in Progress,
@@ -273,20 +266,21 @@ Internet-Draft         Making BMP fruible offline          November 2024
               <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
               bmp-tlv-14>.
 
-
-
-
-
-Lucente                    Expires 8 May 2025                   [Page 5]
-
-Internet-Draft         Making BMP fruible offline          November 2024
-
-
    [I-D.petrie-grow-mrt-bmp]
               Petrie, C., "Storing BMP messages in MRT Format", Work in
               Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
+
+
+
+
+
+
+Lucente, et al.            Expires 9 May 2025                   [Page 5]
+
+Internet-Draft         Making BMP fruible offline          November 2024
+
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -311,7 +305,7 @@ Acknowledgements
 
    TBD
 
-Author's Address
+Authors' Addresses
 
    Paolo Lucente
    NTT
@@ -321,16 +315,22 @@ Author's Address
    Email: paolo@ntt.net
 
 
+   Camilo Cardona
+   NTT
+   164-168, Carrer de Numancia
+   08029 Barcelona
+   Spain
+   Email: camilo@ntt.net
+
+
+   Luuk Hendriks
+   NLnet Labs
+   Science Park 400
+   1098 XH Amsterdam
+   Netherlands
+   Email: luuk@nlnetlabs.nl
 
 
 
 
-
-
-
-
-
-
-
-
-Lucente                    Expires 8 May 2025                   [Page 6]
+Lucente, et al.            Expires 9 May 2025                   [Page 6]
