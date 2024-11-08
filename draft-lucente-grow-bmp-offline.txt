@@ -6,12 +6,12 @@ Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
 Updates: 7854 (if approved)                                          NTT
 Intended status: Standards Track                             L. Hendriks
-Expires: 9 May 2025                                           NLnet Labs
-                                                         5 November 2024
+Expires: 12 May 2025                                          NLnet Labs
+                                                         8 November 2024
 
 
-                       Making BMP fruible offline
-                   draft-lucente-grow-bmp-offline-00
+                       Making BMP usable offline
+                   draft-lucente-grow-bmp-offline-01
 
 Abstract
 
@@ -43,7 +43,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 May 2025.
+   This Internet-Draft will expire on 12 May 2025.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 1]
+Lucente, et al.            Expires 12 May 2025                  [Page 1]
 
-Internet-Draft         Making BMP fruible offline          November 2024
+Internet-Draft          Making BMP usable offline          November 2024
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 2]
+Lucente, et al.            Expires 12 May 2025                  [Page 2]
 
-Internet-Draft         Making BMP fruible offline          November 2024
+Internet-Draft          Making BMP usable offline          November 2024
 
 
    message is composed by a sequence of one or multiple Peer TLVs with
@@ -165,9 +165,9 @@ Internet-Draft         Making BMP fruible offline          November 2024
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 3]
+Lucente, et al.            Expires 12 May 2025                  [Page 3]
 
-Internet-Draft         Making BMP fruible offline          November 2024
+Internet-Draft          Making BMP usable offline          November 2024
 
 
                                   Figure 1
@@ -221,9 +221,9 @@ Internet-Draft         Making BMP fruible offline          November 2024
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 4]
+Lucente, et al.            Expires 12 May 2025                  [Page 4]
 
-Internet-Draft         Making BMP fruible offline          November 2024
+Internet-Draft          Making BMP usable offline          November 2024
 
 
                 +=============+==========================+
@@ -277,9 +277,9 @@ Internet-Draft         Making BMP fruible offline          November 2024
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 5]
+Lucente, et al.            Expires 12 May 2025                  [Page 5]
 
-Internet-Draft         Making BMP fruible offline          November 2024
+Internet-Draft          Making BMP usable offline          November 2024
 
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
@@ -333,4 +333,4 @@ Authors' Addresses
 
 
 
-Lucente, et al.            Expires 9 May 2025                   [Page 6]
+Lucente, et al.            Expires 12 May 2025                  [Page 6]
