@@ -146,11 +146,14 @@
         <section title="Peer Summary message format">
             <t>
 		The Peer Summary message starts with a BMP Common Header as defined
-		in <xref target="RFC7854">Section 4.1 of</xref> then followed by
+		in <xref target="RFC7854">Section 4.1 of</xref>. It is followed by
+		a Peers Count which, similarly to how defined for Stats Reports
+		message in <xref target="RFC7854">Section 4.8 of</xref>, tells how
+		many TLVs will follow in the message. The count is then followed by
 		one or multiple Peer TLVs with code-point &IANA_PS_CODE_PEER_TLV;.
             </t>
             <t>
-		Each Peer TLV is structured as a plain TLV as defined in <xref
+		Each Peer TLV is structured as a non-indexed TLV as defined in <xref
 		target="I-D.ietf-grow-bmp-tlv">Section 3 of</xref>. The value
 		part contains the BMP Common Header and Peer Up Notification
 		body as defined in <xref target="RFC7854">Section 4.10 of</xref>.
@@ -170,6 +173,8 @@
   |                        Message Length                         |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |Msg Type = TBD1|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                         Peers Count                           |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

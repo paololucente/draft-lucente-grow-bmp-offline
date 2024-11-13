@@ -6,8 +6,8 @@ Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
 Updates: 7854 (if approved)                                          NTT
 Intended status: Standards Track                             L. Hendriks
-Expires: 12 May 2025                                          NLnet Labs
-                                                         8 November 2024
+Expires: 17 May 2025                                          NLnet Labs
+                                                        13 November 2024
 
 
                        Making BMP usable offline
@@ -43,7 +43,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 May 2025.
+   This Internet-Draft will expire on 17 May 2025.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Lucente, et al.            Expires 12 May 2025                  [Page 1]
+Lucente, et al.            Expires 17 May 2025                  [Page 1]
 
 Internet-Draft          Making BMP usable offline          November 2024
 
@@ -74,8 +74,8 @@ Table of Contents
    3.  Peer Summary message format . . . . . . . . . . . . . . . . .   3
      3.1.  Third party off-wire encoding formats . . . . . . . . . .   4
    4.  Operational Considerations  . . . . . . . . . . . . . . . . .   4
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
    7.  Normative References  . . . . . . . . . . . . . . . . . . . .   5
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   6
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Lucente, et al.            Expires 12 May 2025                  [Page 2]
+Lucente, et al.            Expires 17 May 2025                  [Page 2]
 
 Internet-Draft          Making BMP usable offline          November 2024
 
@@ -130,16 +130,44 @@ Internet-Draft          Making BMP usable offline          November 2024
 3.  Peer Summary message format
 
    The Peer Summary message starts with a BMP Common Header as defined
-   in Section 4.1 of [RFC7854] then followed by one or multiple Peer
-   TLVs with code-point TBD2.
+   in Section 4.1 of [RFC7854].  It is followed by a Peers Count which,
+   similarly to how defined for Stats Reports message in Section 4.8 of
+   [RFC7854], tells how many TLVs will follow in the message.  The count
+   is then followed by one or multiple Peer TLVs with code-point TBD2.
 
-   Each Peer TLV is structured as a plain TLV as defined in Section 3 of
-   [I-D.ietf-grow-bmp-tlv].  The value part contains the BMP Common
-   Header and Peer Up Notification body as defined in Section 4.10 of
-   [RFC7854].
+   Each Peer TLV is structured as a non-indexed TLV as defined in
+   Section 3 of [I-D.ietf-grow-bmp-tlv].  The value part contains the
+   BMP Common Header and Peer Up Notification body as defined in
+   Section 4.10 of [RFC7854].
 
    The Peer Summary message is generated at a BMP station, it MUST
    encapsulate only actually received Peer Up data from BMP exporters.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.            Expires 17 May 2025                  [Page 3]
+
+Internet-Draft          Making BMP usable offline          November 2024
 
 
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -149,6 +177,8 @@ Internet-Draft          Making BMP usable offline          November 2024
       |                        Message Length                         |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |Msg Type = TBD1|
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                         Peers Count                           |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -160,14 +190,6 @@ Internet-Draft          Making BMP usable offline          November 2024
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       ~                       Peer TLV 3 .. N                         ~
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-
-
-
-Lucente, et al.            Expires 12 May 2025                  [Page 3]
-
-Internet-Draft          Making BMP usable offline          November 2024
 
 
                                   Figure 1
@@ -191,6 +213,19 @@ Internet-Draft          Making BMP usable offline          November 2024
    created every five minutes it may make sense to include the summary
    at the beginning of each file.
 
+
+
+
+
+
+
+
+
+Lucente, et al.            Expires 17 May 2025                  [Page 4]
+
+Internet-Draft          Making BMP usable offline          November 2024
+
+
    A BMP station receiving multiple Peer Up for the same peer should
    perform state compression and include in the Peer Summary the last
    one received, based on timestamp, at the time the summary is being
@@ -211,20 +246,6 @@ Internet-Draft          Making BMP usable offline          November 2024
    Message TLVs".
 
    Registration procedures for this registry are:
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.            Expires 12 May 2025                  [Page 4]
-
-Internet-Draft          Making BMP usable offline          November 2024
-
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
@@ -252,6 +273,15 @@ Internet-Draft          Making BMP usable offline          November 2024
 
 7.  Normative References
 
+
+
+
+
+Lucente, et al.            Expires 17 May 2025                  [Page 5]
+
+Internet-Draft          Making BMP usable offline          November 2024
+
+
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
               BGP Monitoring Protocol (BMP)", Work in Progress,
@@ -271,16 +301,6 @@ Internet-Draft          Making BMP usable offline          November 2024
               Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
-
-
-
-
-
-
-Lucente, et al.            Expires 12 May 2025                  [Page 5]
-
-Internet-Draft          Making BMP usable offline          November 2024
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -306,6 +326,17 @@ Acknowledgements
    TBD
 
 Authors' Addresses
+
+
+
+
+
+
+
+Lucente, et al.            Expires 17 May 2025                  [Page 6]
+
+Internet-Draft          Making BMP usable offline          November 2024
+
 
    Paolo Lucente
    NTT
@@ -333,4 +364,29 @@ Authors' Addresses
 
 
 
-Lucente, et al.            Expires 12 May 2025                  [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.            Expires 17 May 2025                  [Page 7]
