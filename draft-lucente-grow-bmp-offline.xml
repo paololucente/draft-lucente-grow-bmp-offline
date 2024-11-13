@@ -79,18 +79,18 @@
         <abstract>
             <t>
 		<xref target="RFC7854">BMP (BGP Monitoring Protocol)</xref> is perfectly
-		suited for real-time consumption but less ideal for off-wire historical
-		purposes. The main issue is the dependence that parsing BGP Update PDUs
-		has on knowing which capabilities have been agreed when establishing
-		the BGP session with the peers, which could have happened long time
-		ago (days, weeks, months).
+		suited for real-time consumption but less ideal in stream processing and
+		off-wire historical scenario. The main issue is the dependence that parsing
+		BGP Update PDUs has on knowing which capabilities have been agreed when
+		establishing the BGP session with the peers, which could have happened long
+		time ago (days, weeks, months).
 	    </t>
             <t>
 		This document defines a new optional BMP message type, called Peer Summary,
 		that carries a summary of the established BGP sessions along with their
 		capabilities and that is intended to be injected in the BMP feed at
 		configurable time intervals and/or ad-hoc whenever it is felt necessary to
-		improve fruition of BMP data offline.
+		improve fruition of BMP data after it has been collected.
 	    </t>
         </abstract>
     </front>
@@ -119,16 +119,17 @@
 		allow with minor effort to encapsulate BMP in MRT format for offline
 		consumption as documented by <xref target="I-D.petrie-grow-mrt-bmp">
 		Storing BMP messages in MRT Format</xref>, it comes with some drawbacks
-		like extra verbosity and increased correlation effort at a BMP exporter.
+		like extra verbosity and increased correlation effort at a BMP exporter,
+		where resources may be limited.
 	    </t>
 	    <t>
 		This document defines a new optional BMP message type named Peer
 		Summary that carries a list of the established BGP sessions, along
 		with their capabilities. The general idea is that a Peer Summary
 		message is composed by a sequence of one or multiple Peer TLVs with
-		the goal of allowing a consumer to re-build the list of established
-		BGP sessions like if the sequence of Peer Up messages was just being
-		received live by a BMP exporter.
+		the goal of allowing a consumer of BMP data to build the list of
+		established BGP sessions like if the sequence of Peer Up messages
+		was just being received live by a BMP exporter.
 	    </t>
         </section>
 
@@ -192,13 +193,13 @@
 	    </t>
         <section title="Third party off-wire encoding formats">
             <t>
-		While this document does define a way to facilitate replay and more
-		in general consumption of raw BMP data offline, similar benefits may
-		be harnessed by third party off-wire formats, in which BMP can be
-		encapsulated into, for example MRT (Multi-Threaded Routing Toolkit)
-		as defined by <xref target="RFC6396">RFC 6396</xref>. As a result of
-		that, this document does not recommend a preferred way to store BMP
-		data offline. 
+		While this document does define a way to facilitate stream processing,
+		replay and, more in general, consumption of raw BMP data offline,
+		similar benefits may be harnessed by third party off-wire formats in
+		which BMP can be encapsulated into, for example MRT (Multi-Threaded
+		Routing Toolkit) as defined by <xref target="RFC6396">RFC 6396</xref>.
+		As a result of that, this document does not recommend a preferred way
+		to stream process or store BMP data offline. 
             </t>
         </section>
         </section>
@@ -206,12 +207,22 @@
         <section title="Operational Considerations">
             <t>
 		The Peer Summary message injection in a BMP feed is done by an online
-		BMP station for consumption by an offline BMP station. The advantage of
+		BMP station for consumption by an offline consumer. The advantage of
 		creating summaries at the online BMP station (for example, as opposed
 		to creating them at a BMP exporter) is that it has awareness of how
-		offline data is being organized, for example if a new file is created
-		every five minutes it may make sense to include the summary at the
-		beginning of each file.  
+		offline data is being organized, for example:
+	    <list style="symbols">
+		<t>
+		    If BMP data is saved in files and a new file is created every five
+		    minutes, it may make sense to include the summary at the beginning
+		    of each file; or 
+		</t>
+		<t>
+		    If BMP data is streamed onto a message bus like Kafka that supports
+		    partitioning, it may be needed to broadcast summaries over each of
+		    the partitions as they may be attended by different consumers.
+		</t>
+	    </list>
             </t>
 	    <t>
 		A BMP station receiving multiple Peer Up for the same peer should
