@@ -205,6 +205,103 @@
                 </artwork>
             </figure>
 	    </t>
+        <section title="Summary Information TLVs">
+        <t>
+        The Peer Summary message SHOULD carry TLVs providing additional
+        information on the BMP session being summarized. These Summary
+        Information TLVs describe the BMP exporter and station involved,
+        and the date and time the summary was generated.
+        By embedding these TLVs in the offline file, a consumer of the
+        file does not have to rely on the filename or other external
+        data to get these
+        types of information.
+
+        All TLVs are non-indexed. 
+
+        <list style="symbols">
+        <t>
+            Type = TBD3: Datetime of summary
+            <list style="empty">
+            <t>
+                Length: 8 bytes
+            </t>
+            <t>
+                Value: 64bit UNIX epoch, in seconds
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD4: Exporter IP address
+            <list style="empty">
+            <t>
+                Length: 16 bytes
+            </t>
+            <t>
+                Value: IPv6 or IPv4-mapped IPv6 address
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD5: Exporter sysName
+            <list style="empty">
+            <t>
+                Length: variable, non-zero, describing the number of bytes
+            </t>
+            <t>
+                Value: UTF-8 string
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD6: Exporter sysDesc
+            <list style="empty">
+            <t>
+                Length: variable, non-zero, describing the number of bytes
+            </t>
+            <t>
+                Value: UTF-8 string
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD7: Station IP address
+            <list style="empty">
+            <t>
+                Length: variable, non-zero, describing the number of bytes
+            </t>
+            <t>
+                Value: IPv6 or IPv4-mapped IPv6 address
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD8: Station sysName
+            <list style="empty">
+            <t>
+                Length: variable, non-zero, describing the number of bytes
+            </t>
+            <t>
+                Value: UTF-8 string
+            </t>
+            </list>
+        </t>
+        <t>
+            Type = TBD9: Station sysDesc
+            <list style="empty">
+            <t>
+                Length: variable, non-zero, describing the number of bytes
+            </t>
+            <t>
+                Value: UTF-8 string
+            </t>
+            </list>
+        </t>
+
+        </list>
+
+
+            </t>
+        </section>
         <section title="Third party off-wire encoding formats">
             <t>
 		While this document does define a way to facilitate stream processing,

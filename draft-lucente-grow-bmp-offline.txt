@@ -77,13 +77,14 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  Peer Summary message format . . . . . . . . . . . . . . . . .   3
-     3.1.  Third party off-wire encoding formats . . . . . . . . . .   4
-   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   4
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
-   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   6
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   7
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+     3.1.  Summary Information TLVs  . . . . . . . . . . . . . . . .   4
+     3.2.  Third party off-wire encoding formats . . . . . . . . . .   5
+   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   5
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   7
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   8
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
@@ -98,14 +99,13 @@ Table of Contents
    Update making challenging a stateful approach based on receipt of
    Peer Up.
 
-
-
-
-
-
-
-
-
+   TLV support for BMP Route Monitoring and Peer Down Messages
+   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
+   including relevant capabilities that have an impact in BGP Update
+   message parsing as part of optional informational TLV in Route
+   Monitoring messages.  While the method is valid, in fact it does
+   allow with minor effort to encapsulate BMP in MRT format for offline
+   consumption as documented by Storing BMP messages in MRT Format
 
 
 
@@ -114,13 +114,6 @@ Lucente, et al.           Expires 24 July 2025                  [Page 2]
 Internet-Draft          Making BMP usable offline           January 2025
 
 
-   TLV support for BMP Route Monitoring and Peer Down Messages
-   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
-   including relevant capabilities that have an impact in BGP Update
-   message parsing as part of optional informational TLV in Route
-   Monitoring messages.  While the method is valid, in fact it does
-   allow with minor effort to encapsulate BMP in MRT format for offline
-   consumption as documented by Storing BMP messages in MRT Format
    [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
    verbosity and increased correlation effort at a BMP exporter, where
    resources may be limited.
@@ -165,6 +158,13 @@ Internet-Draft          Making BMP usable offline           January 2025
 
 
 
+
+
+
+
+
+
+
 Lucente, et al.           Expires 24 July 2025                  [Page 3]
 
 Internet-Draft          Making BMP usable offline           January 2025
@@ -194,7 +194,67 @@ Internet-Draft          Making BMP usable offline           January 2025
 
                                   Figure 1
 
-3.1.  Third party off-wire encoding formats
+3.1.  Summary Information TLVs
+
+   The Peer Summary message SHOULD carry TLVs providing additional
+   information on the BMP session being summarized.  These Summary
+   Information TLVs describe the BMP exporter and station involved, and
+   the date and time the summary was generated.  By embedding these TLVs
+   in the offline file, a consumer of the file does not have to rely on
+   the filename or other external data to get these types of
+   information.  All TLVs are non-indexed.
+
+   *  Type = TBD3: Datetime of summary
+
+         Length: 8 bytes
+
+         Value: 64bit UNIX epoch, in seconds
+
+   *  Type = TBD4: Exporter IP address
+
+         Length: 16 bytes
+
+         Value: IPv6 or IPv4-mapped IPv6 address
+
+   *  Type = TBD5: Exporter sysName
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 4]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
+         Length: variable, non-zero, describing the number of bytes
+
+         Value: UTF-8 string
+
+   *  Type = TBD6: Exporter sysDesc
+
+         Length: variable, non-zero, describing the number of bytes
+
+         Value: UTF-8 string
+
+   *  Type = TBD7: Station IP address
+
+         Length: variable, non-zero, describing the number of bytes
+
+         Value: IPv6 or IPv4-mapped IPv6 address
+
+   *  Type = TBD8: Station sysName
+
+         Length: variable, non-zero, describing the number of bytes
+
+         Value: UTF-8 string
+
+   *  Type = TBD9: Station sysDesc
+
+         Length: variable, non-zero, describing the number of bytes
+
+         Value: UTF-8 string
+
+3.2.  Third party off-wire encoding formats
 
    While this document does define a way to facilitate stream
    processing, replay and, more in general, consumption of raw BMP data
@@ -212,19 +272,19 @@ Internet-Draft          Making BMP usable offline           January 2025
    to creating them at a BMP exporter) is that it has awareness of how
    offline data is being organized, for example:
 
-   *  If BMP data is saved in files and a new file is created every five
-      minutes, it may make sense to include the summary at the beginning
-      of each file; or
 
 
 
 
 
-
-Lucente, et al.           Expires 24 July 2025                  [Page 4]
+Lucente, et al.           Expires 24 July 2025                  [Page 5]
 
 Internet-Draft          Making BMP usable offline           January 2025
 
+
+   *  If BMP data is saved in files and a new file is created every five
+      minutes, it may make sense to include the summary at the beginning
+      of each file; or
 
    *  If BMP data is streamed onto a message bus like Kafka that
       supports partitioning, it may be needed to broadcast summaries
@@ -273,11 +333,7 @@ Internet-Draft          Making BMP usable offline           January 2025
 
 
 
-
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 5]
+Lucente, et al.           Expires 24 July 2025                  [Page 6]
 
 Internet-Draft          Making BMP usable offline           January 2025
 
@@ -333,7 +389,7 @@ Internet-Draft          Making BMP usable offline           January 2025
 
 
 
-Lucente, et al.           Expires 24 July 2025                  [Page 6]
+Lucente, et al.           Expires 24 July 2025                  [Page 7]
 
 Internet-Draft          Making BMP usable offline           January 2025
 
@@ -389,4 +445,4 @@ Authors' Addresses
 
 
 
-Lucente, et al.           Expires 24 July 2025                  [Page 7]
+Lucente, et al.           Expires 24 July 2025                  [Page 8]
