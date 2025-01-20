@@ -4,9 +4,10 @@
 
 Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
-Updates: 7854 (if approved)                                          NTT
-Intended status: Standards Track                             L. Hendriks
-Expires: 24 July 2025                                         NLnet Labs
+Updates: 7854 (if approved)                                    C. Petrie
+Intended status: Standards Track                                     NTT
+Expires: 24 July 2025                                        L. Hendriks
+                                                              NLnet Labs
                                                          20 January 2025
 
 
@@ -46,10 +47,9 @@ Status of This Memo
 
    This Internet-Draft will expire on 24 July 2025.
 
-Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
-   document authors.  All rights reserved.
+
+
 
 
 
@@ -57,6 +57,11 @@ Lucente, et al.           Expires 24 July 2025                  [Page 1]
 
 Internet-Draft          Making BMP usable offline           January 2025
 
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
@@ -93,16 +98,11 @@ Table of Contents
    Update making challenging a stateful approach based on receipt of
    Peer Up.
 
-   TLV support for BMP Route Monitoring and Peer Down Messages
-   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
-   including relevant capabilities that have an impact in BGP Update
-   message parsing as part of optional informational TLV in Route
-   Monitoring messages.  While the method is valid, in fact it does
-   allow with minor effort to encapsulate BMP in MRT format for offline
-   consumption as documented by Storing BMP messages in MRT Format
-   [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
-   verbosity and increased correlation effort at a BMP exporter, where
-   resources may be limited.
+
+
+
+
+
 
 
 
@@ -113,6 +113,17 @@ Lucente, et al.           Expires 24 July 2025                  [Page 2]
 
 Internet-Draft          Making BMP usable offline           January 2025
 
+
+   TLV support for BMP Route Monitoring and Peer Down Messages
+   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
+   including relevant capabilities that have an impact in BGP Update
+   message parsing as part of optional informational TLV in Route
+   Monitoring messages.  While the method is valid, in fact it does
+   allow with minor effort to encapsulate BMP in MRT format for offline
+   consumption as documented by Storing BMP messages in MRT Format
+   [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
+   verbosity and increased correlation effort at a BMP exporter, where
+   resources may be limited.
 
    This document defines a new optional BMP message type named Peer
    Summary that carries a list of the established BGP sessions, along
@@ -145,17 +156,6 @@ Internet-Draft          Making BMP usable offline           January 2025
 
    The Peer Summary message is generated at a BMP station, it MUST
    encapsulate only actually received Peer Up data from BMP exporters.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -360,20 +360,20 @@ Authors' Addresses
    Email: camilo@ntt.net
 
 
+   Colin Petrie
+   NTT
+   Siriusdreef 70-72
+   2132 WT Hoofddorp
+   Netherlands
+   Email: colin@ntt.net
+
+
    Luuk Hendriks
    NLnet Labs
    Science Park 400
    1098 XH Amsterdam
    Netherlands
    Email: luuk@nlnetlabs.nl
-
-
-
-
-
-
-
-
 
 
 

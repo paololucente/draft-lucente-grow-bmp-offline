@@ -27,7 +27,7 @@
     <front>
         <title>
 	    Making BMP usable offline
-	</title>
+        </title>
 
         <author fullname="Paolo Lucente" initials="P" surname="Lucente">
             <organization>NTT</organization>
@@ -44,30 +44,44 @@
         </author>
 
         <author fullname="Camilo Cardona" initials="C" surname="Cardona">
-          <organization>NTT</organization>
+            <organization>NTT</organization>
             <address>
-              <postal>
-                <street>164-168, Carrer de Numancia</street>
-                <city>Barcelona</city>
-                <code>08029</code>
-                <country>Spain</country>
-              </postal>
-              <email>camilo@ntt.net</email>
+                <postal>
+                    <street>164-168, Carrer de Numancia</street>
+                    <city>Barcelona</city>
+                    <code>08029</code>
+                    <country>Spain</country>
+                </postal>
+                <email>camilo@ntt.net</email>
             </address>
         </author>
 
-	<author fullname="Luuk Hendriks" initials="L." surname="Hendriks">
-	    <organization>NLnet Labs</organization>
-	    <address>
-	        <postal>
-	            <street>Science Park 400</street>
-	            <city>Amsterdam</city>
-	            <code>1098 XH</code>
-	            <country>Netherlands</country>
-	        </postal>
-	        <email>luuk@nlnetlabs.nl</email>
-	    </address>
-	</author>
+        <author fullname="Colin Petrie" initials="C." surname="Petrie">
+            <organization>NTT</organization>
+            <address>
+                <postal>
+                    <street>Siriusdreef 70-72</street>
+                    <city>Hoofddorp</city>
+                    <code>2132 WT</code>
+                    <country>NL</country>
+                </postal>
+                <email>colin@ntt.net</email>
+            </address>
+        </author>
+
+        <author fullname="Luuk Hendriks" initials="L." surname="Hendriks">
+            <organization>NLnet Labs</organization>
+            <address>
+                <postal>
+                    <street>Science Park 400</street>
+                    <city>Amsterdam</city>
+                    <code>1098 XH</code>
+                    <country>Netherlands</country>
+                </postal>
+                <email>luuk@nlnetlabs.nl</email>
+            </address>
+        </author>
+
 
         <date year="2025"/>
 
