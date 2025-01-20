@@ -76,15 +76,19 @@ Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  Peer Summary message format . . . . . . . . . . . . . . . . .   3
-     3.1.  Summary Information TLVs  . . . . . . . . . . . . . . . .   4
-     3.2.  Third party off-wire encoding formats . . . . . . . . . .   5
-   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   5
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
-   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   7
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   8
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
+   3.  Peer Summary message format . . . . . . . . . . . . . . . . .   4
+     3.1.  Summary Information TLVs  . . . . . . . . . . . . . . . .   5
+     3.2.  Summary/synthetic flag  . . . . . . . . . . . . . . . . .   6
+     3.3.  Third party off-wire encoding formats . . . . . . . . . .   6
+   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   6
+     4.1.  Exporter vs. Station  . . . . . . . . . . . . . . . . . .   6
+       4.1.1.  Exporter use-cases / benefits . . . . . . . . . . . .   6
+       4.1.2.  Station use-cases / benefits  . . . . . . . . . . . .   7
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   8
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   9
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
 1.  Introduction
 
@@ -102,10 +106,6 @@ Table of Contents
    TLV support for BMP Route Monitoring and Peer Down Messages
    [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
    including relevant capabilities that have an impact in BGP Update
-   message parsing as part of optional informational TLV in Route
-   Monitoring messages.  While the method is valid, in fact it does
-   allow with minor effort to encapsulate BMP in MRT format for offline
-   consumption as documented by Storing BMP messages in MRT Format
 
 
 
@@ -114,9 +114,22 @@ Lucente, et al.           Expires 24 July 2025                  [Page 2]
 Internet-Draft          Making BMP usable offline           January 2025
 
 
+   message parsing as part of optional informational TLV in Route
+   Monitoring messages.  While the method is valid, in fact it does
+   allow with minor effort to encapsulate BMP in MRT format for offline
+   consumption as documented by Storing BMP messages in MRT Format
    [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
    verbosity and increased correlation effort at a BMP exporter, where
    resources may be limited.
+
+   Similar to how the necessary information carried in the BGP OPEN
+   messages is sent from the exporter to the station only in the
+   beginning of a BMP session (in forms of PeerUpNotifications), the
+   contents of the RIBs is also only sent at the beginning (in forms of
+   RouteMonitoring messages).  In other words, to make correct and
+   complete sense of offline BMP data, both current state (RIB contents)
+   and session details (BGP OPEN Capabilities) to parse future state
+   changes are required.
 
    This document defines a new optional BMP message type named Peer
    Summary that carries a list of the established BGP sessions, along
@@ -126,6 +139,20 @@ Internet-Draft          Making BMP usable offline           January 2025
    established BGP sessions like if the sequence of Peer Up messages was
    just being received live by a BMP exporter.
 
+   To disseminate the RIB contents, no new message type is introduced.
+   Instead, RouteMonitoring messages are used, similarly to how RIB
+   contents are sent at the beginning of a BMP session.  To distinguish
+   between such a RIB sync and RouteMonitoring messages representing
+   state changes, this document defines a new 'Summary' flag in the Peer
+   flags field in the Per-Peer header.
+
+   The new concepts described in this document are not restricted to
+   either the BMP exporter or the BMP station.  Typically, the former
+   might have tighter constraints in terms of resources, and
+   implementing the new concepts there might be less feasible or perhaps
+   unwanted.  The Operational Considerations includes discussions on
+   pros and cons in various scenarios.
+
 2.  Terminology
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -133,6 +160,15 @@ Internet-Draft          Making BMP usable offline           January 2025
    "OPTIONAL" in this document are to be interpreted as described in BCP
    14 RFC 2119 [RFC2119] RFC 8174 [RFC8174] when, and only when, they
    appear in all capitals, as shown here.
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 3]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
 
 3.  Peer Summary message format
 
@@ -147,27 +183,9 @@ Internet-Draft          Making BMP usable offline           January 2025
    BMP Common Header and Peer Up Notification body as defined in
    Section 4.10 of [RFC7854].
 
-   The Peer Summary message is generated at a BMP station, it MUST
-   encapsulate only actually received Peer Up data from BMP exporters.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 3]
-
-Internet-Draft          Making BMP usable offline           January 2025
+   The Peer Summary message can be generated by a BMP exporter or by a
+   BMP station.  It MUST encapsulate only Peer Up data that was actually
+   sent or received, respectively.
 
 
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -194,6 +212,20 @@ Internet-Draft          Making BMP usable offline           January 2025
 
                                   Figure 1
 
+
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 4]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
 3.1.  Summary Information TLVs
 
    The Peer Summary message SHOULD carry TLVs providing additional
@@ -217,14 +249,6 @@ Internet-Draft          Making BMP usable offline           January 2025
          Value: IPv6 or IPv4-mapped IPv6 address
 
    *  Type = TBD5: Exporter sysName
-
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 4]
-
-Internet-Draft          Making BMP usable offline           January 2025
-
 
          Length: variable, non-zero, describing the number of bytes
 
@@ -250,11 +274,37 @@ Internet-Draft          Making BMP usable offline           January 2025
 
    *  Type = TBD9: Station sysDesc
 
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 5]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-3.2.  Third party off-wire encoding formats
+3.2.  Summary/synthetic flag
+
+   Within the Peer flags field in the Per-Peer Header, as defined in
+   Section 4.2 of [RFC7854], this document defines bit 4 as the 'S' bit,
+   indicating the message is part of a summary.  Note that contextual
+   information from a Peer Summary message is required to determine
+   whether a message with the 'S' bit set to 1 is generated by the
+   exporter or by the BMP station.
+
+
+                              0 1 2 3 4 5 6 7
+                             +-+-+-+-+-+-+-+-+
+                             |V|L|A|O|S| Rsv |
+                             +-+-+-+-+-+-+-+-+
+
+
+                           Figure 2: Summary flag
+
+3.3.  Third party off-wire encoding formats
 
    While this document does define a way to facilitate stream
    processing, replay and, more in general, consumption of raw BMP data
@@ -266,21 +316,35 @@ Internet-Draft          Making BMP usable offline           January 2025
 
 4.  Operational Considerations
 
+4.1.  Exporter vs. Station
+
+   TODO
+
+4.1.1.  Exporter use-cases / benefits
+
+   TODO
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 6]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
+4.1.2.  Station use-cases / benefits
+
    The Peer Summary message injection in a BMP feed is done by an online
    BMP station for consumption by an offline consumer.  The advantage of
    creating summaries at the online BMP station (for example, as opposed
    to creating them at a BMP exporter) is that it has awareness of how
    offline data is being organized, for example:
-
-
-
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 5]
-
-Internet-Draft          Making BMP usable offline           January 2025
-
 
    *  If BMP data is saved in files and a new file is created every five
       minutes, it may make sense to include the summary at the beginning
@@ -312,6 +376,24 @@ Internet-Draft          Making BMP usable offline           January 2025
 
    Registration procedures for this registry are:
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 7]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
                 +=============+==========================+
@@ -327,16 +409,6 @@ Internet-Draft          Making BMP usable offline           January 2025
                                  Table 1
 
    Initial values for this registry are:
-
-
-
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 6]
-
-Internet-Draft          Making BMP usable offline           January 2025
-
 
                   +======+=============+===============+
                   | Type | Description |   Reference   |
@@ -368,6 +440,16 @@ Internet-Draft          Making BMP usable offline           January 2025
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
 
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 8]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -386,13 +468,6 @@ Internet-Draft          Making BMP usable offline           January 2025
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
-
-
-
-Lucente, et al.           Expires 24 July 2025                  [Page 7]
-
-Internet-Draft          Making BMP usable offline           January 2025
-
 
 Acknowledgements
 
@@ -424,6 +499,13 @@ Authors' Addresses
    Email: colin@ntt.net
 
 
+
+
+Lucente, et al.           Expires 24 July 2025                  [Page 9]
+
+Internet-Draft          Making BMP usable offline           January 2025
+
+
    Luuk Hendriks
    NLnet Labs
    Science Park 400
@@ -445,4 +527,34 @@ Authors' Addresses
 
 
 
-Lucente, et al.           Expires 24 July 2025                  [Page 8]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 24 July 2025                 [Page 10]
