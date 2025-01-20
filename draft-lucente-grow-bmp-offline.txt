@@ -6,8 +6,8 @@ Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
 Updates: 7854 (if approved)                                          NTT
 Intended status: Standards Track                             L. Hendriks
-Expires: 17 May 2025                                          NLnet Labs
-                                                        13 November 2024
+Expires: 24 July 2025                                         NLnet Labs
+                                                         20 January 2025
 
 
                        Making BMP usable offline
@@ -44,18 +44,18 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 May 2025.
+   This Internet-Draft will expire on 24 July 2025.
 
 Copyright Notice
 
-   Copyright (c) 2024 IETF Trust and the persons identified as the
+   Copyright (c) 2025 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 1]
+Lucente, et al.           Expires 24 July 2025                  [Page 1]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 2]
+Lucente, et al.           Expires 24 July 2025                  [Page 2]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
    This document defines a new optional BMP message type named Peer
@@ -165,9 +165,9 @@ Internet-Draft          Making BMP usable offline          November 2024
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 3]
+Lucente, et al.           Expires 24 July 2025                  [Page 3]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -221,9 +221,9 @@ Internet-Draft          Making BMP usable offline          November 2024
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 4]
+Lucente, et al.           Expires 24 July 2025                  [Page 4]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
    *  If BMP data is streamed onto a message bus like Kafka that
@@ -277,9 +277,9 @@ Internet-Draft          Making BMP usable offline          November 2024
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 5]
+Lucente, et al.           Expires 24 July 2025                  [Page 5]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
                   +======+=============+===============+
@@ -302,9 +302,9 @@ Internet-Draft          Making BMP usable offline          November 2024
    [I-D.ietf-grow-bmp-tlv]
               Lucente, P. and Y. Gu, "BMP v4: TLV support for BMP Route
               Monitoring and Peer Down Messages", Work in Progress,
-              Internet-Draft, draft-ietf-grow-bmp-tlv-14, 18 March 2024,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
-              bmp-tlv-14>.
+              Internet-Draft, draft-ietf-grow-bmp-tlv-15, 17 January
+              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              grow-bmp-tlv-15>.
 
    [I-D.petrie-grow-mrt-bmp]
               Petrie, C., "Storing BMP messages in MRT Format", Work in
@@ -333,9 +333,9 @@ Internet-Draft          Making BMP usable offline          November 2024
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 6]
+Lucente, et al.           Expires 24 July 2025                  [Page 6]
 
-Internet-Draft          Making BMP usable offline          November 2024
+Internet-Draft          Making BMP usable offline           January 2025
 
 
 Acknowledgements
@@ -389,4 +389,4 @@ Authors' Addresses
 
 
 
-Lucente, et al.            Expires 17 May 2025                  [Page 7]
+Lucente, et al.           Expires 24 July 2025                  [Page 7]
