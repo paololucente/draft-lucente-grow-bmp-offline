@@ -26,7 +26,7 @@
 
     <front>
         <title>
-	    Making BMP usable offline
+	    BMP State Summaries
         </title>
 
         <author fullname="Paolo Lucente" initials="P" surname="Lucente">
@@ -99,13 +99,19 @@
 		establishing the BGP session with the peers, which could have happened long
 		time ago (days, weeks, months).
 	    </t>
-            <t>
-		This document defines a new optional BMP message type, called Peer Summary,
-		that carries a summary of the established BGP sessions along with their
-		capabilities and that is intended to be injected in the BMP feed at
-		configurable time intervals and/or ad-hoc whenever it is felt necessary to
-		improve fruition of BMP data after it has been collected.
-	    </t>
+        <t>
+            This document introduces the concept of Summaries. It defines a new
+            optional BMP message type, called State Summary, and a new TLV,
+            called Summary Id.
+            A Summary is similar to the initial synchronisation performed upon
+            establishment of the BMP session: all BGP session information is
+            exported in PeerUpNofication messages, and all RIB contents are
+            exported in RouteMonitoring messages. All the messages carry the new
+            Summary Id TLV, containing an ID uniquely identifying the summary
+            these messages belong to. The messages are preceded by a State
+            Summary message, carrying the same Summary Id TLV, as well as
+            meta-data describing the Summary.
+        </t>
         </abstract>
     </front>
 
