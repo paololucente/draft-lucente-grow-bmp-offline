@@ -153,29 +153,28 @@
         required.
         </t>
 	    <t>
-		This document defines a new optional BMP message type named Peer
-		Summary that carries a list of the established BGP sessions, along
-		with their capabilities. The general idea is that a Peer Summary
-		message is composed by a sequence of one or multiple Peer TLVs with
-		the goal of allowing a consumer of BMP data to build the list of
-		established BGP sessions like if the sequence of Peer Up messages
-		was just being received live by a BMP exporter. 
+            This document introduces Summaries, enabling synchronisation of both
+            session information and RIB contents anywhere in a BMP session.
+            Summaries are enabled by the new optional State Summary message type
+            and the new Summary Id TLV, both introduced in this document.
+            A Summary is a collection of PeerUpNotification messages,
+            RouteMonitoring messages and a single State Summary message, all
+            carrying the newly introduced Summary Id TLV containing the unique
+            identifier for that Summary. The State Summary message further
+            contains TLVs with meta-data describing when the Summary was
+            created, information on the exporting side such as sysName and IP
+            address, information on the collecting side such as BMP station
+            software name and versions, etc.
         </t>
         <t>
-        To disseminate the RIB contents, no new message type is introduced.
-        Instead, RouteMonitoring messages are used, similarly to how RIB
-        contents are sent at the beginning of a BMP session. To distinguish
-        between such a RIB sync and RouteMonitoring messages representing state
-        changes, this document defines a new 'Summary' flag in the Peer flags
-        field in the Per-Peer header.
-	    </t>
-        <t>
-        The new concepts described in this document are not restricted to
-        either the BMP exporter or the BMP station. Typically, the former might
-        have tighter constraints in terms of resources, and implementing the new
-        concepts there might be less feasible or perhaps unwanted. The
-        <xref target="opcon" format="title"/> includes discussions on pros and
-        cons in various scenarios.
+            The new concepts described in this document are not restricted to
+            either the BMP exporter or the BMP station. By building upon TLVs,
+            supported in all BMP message types from BMPv4, the Summary approach
+            imposes minimal requirements over the initial synchronisation in BMP
+            today. Furthermore, if at any point in the future another message
+            type needs to be incorporated in a Summary, it will be a simple
+            matter of attaching the Summary Id TLV to those messages.
+            No existing message types have to be adapted to support Summaries.
         </t>
         </section>
 
