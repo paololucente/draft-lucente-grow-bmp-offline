@@ -199,8 +199,8 @@
                 The Common Header is directly followed by non-indexed TLVs. The
                 Summary Id TLV defined in
                 <xref target="summary-id-tlv"/>
-                MUST be present and SHOULD be the first of the TLVs. All other
-                additional TLVs, listed in <xref target="meta-data-tlvs"/> are
+                MUST be present and SHOULD be the first of the TLVs. All 
+                additional TLVs listed in <xref target="meta-data-tlvs"/> are
                 optional.
             </t>
             <t>
@@ -216,11 +216,12 @@
                     The Summary Id TLV is the only mandatory TLV of a State
                     Summary message as defined in
                     <xref target="state-summary-message"/>.
-                    It is a non-indexed TLV, following the standard structure as
-                    defined in <xref target="TODO"/>, with a fixed value length
-                    of 16 bytes. This allows the use of UUID version 4
-                    identifiers, or provides sufficient space for alternative
-                    schemes.
+                    It is a non-indexed TLV, structured as defined
+                    in <xref target="I-D.ietf-grow-bmp-tlv" section="4"/>,
+                    with a fixed value length of 16 bytes. This allows the
+                    use of UUID identifiers, or provides sufficient space
+                    for alternative schemes. Different approaches for schemes
+                    are discussed in <xref target="opcon"/>.
                 </t>
             </section>
             <section title="Optional meta-data TLVs" anchor="meta-data-tlvs">
