@@ -6,12 +6,12 @@ Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
 Updates: 7854 (if approved)                                    C. Petrie
 Intended status: Standards Track                                     NTT
-Expires: 7 August 2025                                       L. Hendriks
+Expires: 17 August 2025                                      L. Hendriks
                                                               NLnet Labs
-                                                         3 February 2025
+                                                        13 February 2025
 
 
-                       Making BMP usable offline
+                          BMP State Summaries
                    draft-lucente-grow-bmp-offline-01
 
 Abstract
@@ -23,12 +23,16 @@ Abstract
    when establishing the BGP session with the peers, which could have
    happened long time ago (days, weeks, months).
 
-   This document defines a new optional BMP message type, called Peer
-   Summary, that carries a summary of the established BGP sessions along
-   with their capabilities and that is intended to be injected in the
-   BMP feed at configurable time intervals and/or ad-hoc whenever it is
-   felt necessary to improve fruition of BMP data after it has been
-   collected.
+   This document introduces the concept of Summaries.  It defines a new
+   optional BMP message type, called State Summary, and a new TLV,
+   called Summary Id.  A Summary is similar to the initial
+   synchronisation performed upon establishment of the BMP session: all
+   BGP session information is exported in PeerUpNofication messages, and
+   all RIB contents are exported in RouteMonitoring messages.  All the
+   messages carry the new Summary Id TLV, containing an ID uniquely
+   identifying the summary these messages belong to.  The messages are
+   preceded by a State Summary message, carrying the same Summary Id
+   TLV, as well as meta-data describing the Summary.
 
 Status of This Memo
 
@@ -45,17 +49,13 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 August 2025.
+   This Internet-Draft will expire on 17 August 2025.
 
 
 
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 1]
+Lucente, et al.          Expires 17 August 2025                 [Page 1]
 
-Internet-Draft          Making BMP usable offline          February 2025
+Internet-Draft             BMP State Summaries             February 2025
 
 
 Copyright Notice
@@ -75,18 +75,23 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
-   3.  Peer Summary message format . . . . . . . . . . . . . . . . .   4
-     3.1.  Summary Information TLVs  . . . . . . . . . . . . . . . .   5
-     3.2.  Summary/synthetic flag  . . . . . . . . . . . . . . . . .   6
-     3.3.  Third party off-wire encoding formats . . . . . . . . . .   6
-   4.  Operational Considerations  . . . . . . . . . . . . . . . . .   6
-     4.1.  Exporter vs. Station  . . . . . . . . . . . . . . . . . .   6
-       4.1.1.  Exporter use-cases / benefits . . . . . . . . . . . .   6
-       4.1.2.  Station use-cases / benefits  . . . . . . . . . . . .   7
-   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   7.  Normative References  . . . . . . . . . . . . . . . . . . . .   8
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   3.  State Summary message format  . . . . . . . . . . . . . . . .   4
+     3.1.  Summary Information TLVs  . . . . . . . . . . . . . . . .   4
+       3.1.1.  Summary Id TLV  . . . . . . . . . . . . . . . . . . .   4
+       3.1.2.  Optional meta-data TLVs . . . . . . . . . . . . . . .   4
+     3.2.  Third party off-wire encoding formats . . . . . . . . . .   5
+   4.  Initial synchronisation as Summary  . . . . . . . . . . . . .   6
+   5.  Operational Considerations  . . . . . . . . . . . . . . . . .   6
+     5.1.  Summary Id scheme . . . . . . . . . . . . . . . . . . . .   6
+       5.1.1.  Global uniqueness . . . . . . . . . . . . . . . . . .   6
+       5.1.2.  Increasing identifiers  . . . . . . . . . . . . . . .   7
+     5.2.  Exporter vs. Station  . . . . . . . . . . . . . . . . . .   7
+       5.2.1.  Exporter use-cases / benefits . . . . . . . . . . . .   7
+       5.2.2.  Station use-cases / benefits  . . . . . . . . . . . .   7
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
+   8.  Normative References  . . . . . . . . . . . . . . . . . . . .   8
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .   9
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   9
 
@@ -97,6 +102,18 @@ Table of Contents
    of capabilities exchanged at BGP Open time as reported by BMP Peer Up
    messages.
 
+
+
+
+
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 2]
+
+Internet-Draft             BMP State Summaries             February 2025
+
+
    The role of Peer Up messages is solely BGP session event logging and
    the long-lived nature of sessions does pose the problem that a BGP
    Open message may have been received long time before parsing a BGP
@@ -106,14 +123,6 @@ Table of Contents
    TLV support for BMP Route Monitoring and Peer Down Messages
    [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
    including relevant capabilities that have an impact in BGP Update
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 2]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
-
    message parsing as part of optional informational TLV in Route
    Monitoring messages.  While the method is valid, in fact it does
    allow with minor effort to encapsulate BMP in MRT format for offline
@@ -131,27 +140,35 @@ Internet-Draft          Making BMP usable offline          February 2025
    and session details (BGP OPEN Capabilities) to parse future state
    changes are required.
 
-   This document defines a new optional BMP message type named Peer
-   Summary that carries a list of the established BGP sessions, along
-   with their capabilities.  The general idea is that a Peer Summary
-   message is composed by a sequence of one or multiple Peer TLVs with
-   the goal of allowing a consumer of BMP data to build the list of
-   established BGP sessions like if the sequence of Peer Up messages was
-   just being received live by a BMP exporter.
-
-   To disseminate the RIB contents, no new message type is introduced.
-   Instead, RouteMonitoring messages are used, similarly to how RIB
-   contents are sent at the beginning of a BMP session.  To distinguish
-   between such a RIB sync and RouteMonitoring messages representing
-   state changes, this document defines a new 'Summary' flag in the Peer
-   flags field in the Per-Peer header.
+   This document introduces Summaries, enabling synchronisation of both
+   BGP session information and RIB contents anywhere in a BMP session.
+   Summaries are enabled by the new optional State Summary message type
+   and the new Summary Id TLV, both introduced in this document.  A
+   Summary is a collection of PeerUpNotification messages,
+   RouteMonitoring messages and a single State Summary message, all
+   carrying the newly introduced Summary Id TLV containing the unique
+   identifier for that Summary.  The State Summary message further
+   contains TLVs with meta-data describing when the Summary was created,
+   information on the exporting side such as sysName and IP address,
+   information on the collecting side such as BMP station software name
+   and versions, etc.
 
    The new concepts described in this document are not restricted to
-   either the BMP exporter or the BMP station.  Typically, the former
-   might have tighter constraints in terms of resources, and
-   implementing the new concepts there might be less feasible or perhaps
-   unwanted.  The Operational Considerations includes discussions on
-   pros and cons in various scenarios.
+   either the BMP exporter or the BMP station.  By building upon TLVs,
+   supported in all BMP message types from BMPv4, the Summary approach
+   imposes minimal requirements over the initial synchronisation in BMP
+   today.  Furthermore, if at any point in the future another message
+   type needs to be incorporated in a Summary, it will be a simple
+   matter of attaching the Summary Id TLV to those messages.  No
+   existing message types have to be adapted to support Summaries.
+
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 3]
+
+Internet-Draft             BMP State Summaries             February 2025
+
 
 2.  Terminology
 
@@ -161,72 +178,32 @@ Internet-Draft          Making BMP usable offline          February 2025
    14 RFC 2119 [RFC2119] RFC 8174 [RFC8174] when, and only when, they
    appear in all capitals, as shown here.
 
+3.  State Summary message format
 
+   The State Summary message starts with a BMP Common Header as defined
+   in Section 4.1 of [RFC7854].  The Common Header is directly followed
+   by non-indexed TLVs.  The Summary Id TLV defined in Section 3.1.1
+   MUST be present and SHOULD be the first of the TLVs.  All additional
+   TLVs listed in Section 3.1.2 are optional.
 
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 3]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
-
-3.  Peer Summary message format
-
-   The Peer Summary message starts with a BMP Common Header as defined
-   in Section 4.1 of [RFC7854].  It is followed by a Peers Count which,
-   similarly to how defined for Stats Reports message in Section 4.8 of
-   [RFC7854], tells how many TLVs will follow in the message.  The count
-   is then followed by one or multiple Peer TLVs with code-point TBD2.
-
-   Each Peer TLV is structured as a non-indexed TLV as defined in
-   Section 3 of [I-D.ietf-grow-bmp-tlv].  The value part contains the
-   BMP Common Header and Peer Up Notification body as defined in
-   Section 4.10 of [RFC7854].
-
-   The Peer Summary message can be generated by a BMP exporter or by a
-   BMP station.  It MUST encapsulate only Peer Up data that was actually
-   sent or received, respectively.
-
-
-      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-      +-+-+-+-+-+-+-+-+
-      |    Version    |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                        Message Length                         |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |Msg Type = TBD1|
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                         Peers Count                           |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ~                       Peer TLV 3 .. N                         ~
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-                                  Figure 1
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 4]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
+   The State Summary message can be generated by a BMP exporter or by a
+   BMP station, as long as all required data for the PeerUpNotification
+   and RouteMonitoring messages pertaining to the Summary are available.
+   The State Summary message MUST be followed by those messages, with
+   the Summary Id TLV attached.
 
 3.1.  Summary Information TLVs
+
+3.1.1.  Summary Id TLV
+
+   The Summary Id TLV is the only mandatory TLV of a State Summary
+   message as defined in Section 3.  It is a non-indexed TLV, structured
+   as defined in Section 4 of [I-D.ietf-grow-bmp-tlv], with a fixed
+   value length of 16 bytes.  This allows the use of UUID identifiers,
+   or provides sufficient space for alternative schemes.  Different
+   approaches for schemes are discussed in Section 5.
+
+3.1.2.  Optional meta-data TLVs
 
    The Peer Summary message SHOULD carry TLVs providing additional
    information on the BMP session being summarized.  These Summary
@@ -241,6 +218,13 @@ Internet-Draft          Making BMP usable offline          February 2025
          Length: 8 bytes
 
          Value: 64bit UNIX epoch, in seconds
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 4]
+
+Internet-Draft             BMP State Summaries             February 2025
+
 
    *  Type = TBD4: Exporter IP address
 
@@ -274,37 +258,11 @@ Internet-Draft          Making BMP usable offline          February 2025
 
    *  Type = TBD9: Station sysDesc
 
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 5]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
-
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-3.2.  Summary/synthetic flag
-
-   Within the Peer flags field in the Per-Peer Header, as defined in
-   Section 4.2 of [RFC7854], this document defines bit 4 as the 'S' bit,
-   indicating the message is part of a summary.  Note that contextual
-   information from a Peer Summary message is required to determine
-   whether a message with the 'S' bit set to 1 is generated by the
-   exporter or by the BMP station.
-
-
-                              0 1 2 3 4 5 6 7
-                             +-+-+-+-+-+-+-+-+
-                             |V|L|A|O|S| Rsv |
-                             +-+-+-+-+-+-+-+-+
-
-
-                           Figure 2: Summary flag
-
-3.3.  Third party off-wire encoding formats
+3.2.  Third party off-wire encoding formats
 
    While this document does define a way to facilitate stream
    processing, replay and, more in general, consumption of raw BMP data
@@ -314,31 +272,97 @@ Internet-Draft          Making BMP usable offline          February 2025
    As a result of that, this document does not recommend a preferred way
    to stream process or store BMP data offline.
 
-4.  Operational Considerations
-
-4.1.  Exporter vs. Station
-
-   TODO
-
-4.1.1.  Exporter use-cases / benefits
-
-   TODO
 
 
 
 
 
-
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 6]
+Lucente, et al.          Expires 17 August 2025                 [Page 5]
 
-Internet-Draft          Making BMP usable offline          February 2025
+Internet-Draft             BMP State Summaries             February 2025
 
 
-4.1.2.  Station use-cases / benefits
+4.  Initial synchronisation as Summary
+
+   BMP exporters supporting Summaries as described in this document
+   SHOULD make the initial synchronisation at the start of a BMP session
+   a Summary as well.  Compared to the 'classic' synchronisation as
+   described in [RFC7854], the difference is:
+
+   *  Generating the identifier,
+
+   *  constructing and sending out a State Summary message,
+
+   *  attaching a Summary Id TLV to all PeerUpNotification and
+      RouteMonitoring messages.
+
+   With both the State Summary message type and the Summary Id TLVs (on
+   the PeerUpNotification and RouteMonitoring messages) being optional,
+   a Summary-style synchronisation as described here is fully backwards
+   compatible with BMP stations not supporting Summaries.  For stations
+   that do support Summaries, making the initial synchronisation a
+   Summary has benefits:
+
+   *  Overall consistency / fewer different code paths;
+
+   *  The possibility to distinguish between RouteMonitoring messages
+      pertaining to the initial synchronisation and RouteMonitoring
+      messages carrying BGP UPDATEs received by the BMP exporter.
+
+   (DISCUSS: could/should this be a mandatory thing for BMPv4?)
+
+5.  Operational Considerations
+
+5.1.  Summary Id scheme
+
+   The generation and form of the Summary Ids introduced in this
+   document is left to implementations.  This document does not enforce
+   any specific approach, though at least the following points should be
+   considered.  Note that implementations are not limited to supporting
+   only one Id scheme, but ideally support multiple schemes via local
+   configuration.
+
+5.1.1.  Global uniqueness
+
+   In deployments where information received via multiple BMP vantage
+   points is disseminated over a bus (e.g.  Kafka), unique Summary Ids
+   might prove handy or even crucial in order to distinguish Summary A
+   originally sent by BMP exporter X, from Summary B sent by exporter Y.
+   If all exporting processes rely on an algorithm producing globally
+   unique identifiers, e.g.  UUID version 4, they all can send out
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 6]
+
+Internet-Draft             BMP State Summaries             February 2025
+
+
+   Summaries without possibly using an identical Summary Id generated by
+   another exporter.
+
+5.1.2.  Increasing identifiers
+
+   Generating (linearly) increasing identifiers enable the BMP station
+   to order Summaries, and, to spot any missing Summaries.  Furthermore,
+   in a (long running) BMP session where the exporter generates
+   Summaries, the Summary Id doubles as a counter signalling how many
+   Summaries have been sent so far.  Note that some of these can be
+   deduced via other means: ordering of Summaries can be done based on
+   the Timestamp TLV (TBD3), and the number of sent Summaries could be
+   included in the StatsReport message (Section 4.8 of [RFC7854]).
+
+5.2.  Exporter vs. Station
+
+   (DISCUSS: do we allow both exporter and station to generate
+   summaries?  Technically there is no problem, but perhaps the results
+   are wasteful/redundant/confusing?)
+
+5.2.1.  Exporter use-cases / benefits
+
+   TODO
+
+5.2.2.  Station use-cases / benefits
 
    The Peer Summary message injection in a BMP feed is done by an online
    BMP station for consumption by an offline consumer.  The advantage of
@@ -362,12 +386,20 @@ Internet-Draft          Making BMP usable offline          February 2025
    a BGP session is flapping, as event reporting and this is left to BMP
    Route Event Logging [I-D.ietf-grow-bmp-rel].
 
-5.  Security Considerations
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 7]
+
+Internet-Draft             BMP State Summaries             February 2025
+
+
+6.  Security Considerations
 
    It is not believed that this document adds any additional security
    considerations.
 
-6.  IANA Considerations
+7.  IANA Considerations
 
    IANA is asked to allocate a new Peer Summary message type in the BMP
    Message Types registry with value TBD1.  IANA is also asked to to
@@ -375,24 +407,6 @@ Internet-Draft          Making BMP usable offline          February 2025
    Message TLVs".
 
    Registration procedures for this registry are:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 7]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
@@ -418,7 +432,7 @@ Internet-Draft          Making BMP usable offline          February 2025
 
                                  Table 2
 
-7.  Normative References
+8.  Normative References
 
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
@@ -426,6 +440,15 @@ Internet-Draft          Making BMP usable offline          February 2025
               Internet-Draft, draft-ietf-grow-bmp-rel-02, 8 July 2024,
               <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
               bmp-rel-02>.
+
+
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 8]
+
+Internet-Draft             BMP State Summaries             February 2025
+
 
    [I-D.ietf-grow-bmp-tlv]
               Lucente, P. and Y. Gu, "BMP v4: TLV support for BMP Route
@@ -439,16 +462,6 @@ Internet-Draft          Making BMP usable offline          February 2025
               Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
-
-
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 8]
-
-Internet-Draft          Making BMP usable offline          February 2025
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -483,6 +496,16 @@ Authors' Addresses
    Email: paolo@ntt.net
 
 
+
+
+
+
+
+Lucente, et al.          Expires 17 August 2025                 [Page 9]
+
+Internet-Draft             BMP State Summaries             February 2025
+
+
    Camilo Cardona
    NTT
    164-168, Carrer de Numancia
@@ -497,13 +520,6 @@ Authors' Addresses
    2132 WT Hoofddorp
    Netherlands
    Email: colin@ntt.net
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                 [Page 9]
-
-Internet-Draft          Making BMP usable offline          February 2025
 
 
    Luuk Hendriks
@@ -541,20 +557,4 @@ Internet-Draft          Making BMP usable offline          February 2025
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 7 August 2025                [Page 10]
+Lucente, et al.          Expires 17 August 2025                [Page 10]
