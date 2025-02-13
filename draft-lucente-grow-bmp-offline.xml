@@ -334,6 +334,44 @@
             </t>
         </section>
         </section>
+        <section title="Initial synchronisation as Summary">
+            <t>
+                BMP exporters supporting Summaries as described in this document
+                SHOULD make the initial synchronisation at the start of a BMP
+                session a Summary as well. Compared to the 'classic'
+                synchronisation as described in <xref target="RFC7854"/>, the
+                difference is:
+                <list style="symbols">
+                    <t>Generating the identifier,</t>
+                    <t>constructing and sending out a State Summary message,</t>
+                    <t>
+                        attaching a Summary Id TLV to all PeerUpNotification
+                        and RouteMonitoring messages.
+                    </t>
+
+                </list>
+
+                With both the State Summary message type and the Summary Id TLVs
+                (on the PeerUpNotification and RouteMonitoring messages) being
+                optional, a Summary-style synchronisation as described here is
+                fully backwards compatible with BMP stations not supporting
+                Summaries.
+
+                For stations that do support Summaries, making the initial
+                synchronisation a Summary has benefits:
+                <list style="symbols">
+                    <t>Overall consistency / fewer different code paths;</t>
+                    <t>
+                        The possibility to distinguish between
+                        RouteMonitoring messages pertaining to the initial
+                        synchronisation and RouteMonitoring messages
+                        carrying BGP UPDATEs received by the BMP exporter.
+                    </t>
+                </list>
+
+                (DISCUSS: could/should this be a mandatory thing for BMPv4?)
+            </t>
+        </section>
 
         <section title="Operational Considerations" anchor="opcon">
         <section title="Exporter vs. Station">
