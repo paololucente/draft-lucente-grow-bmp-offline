@@ -56,13 +56,13 @@
             </address>
         </author>
 
-        <author fullname="Colin Petrie" initials="C." surname="Petrie">
+        <author fullname="Colin Petrie" initials="C" surname="Petrie">
             <organization>NTT</organization>
             <address>
                 <postal>
-                    <street>Siriusdreef 70-72</street>
-                    <city>Hoofddorp</city>
-                    <code>2132 WT</code>
+                    <street>Veemweg 23</street>
+                    <city>Barneveld</city>
+                    <code>3771 MT</code>
                     <country>NL</country>
                 </postal>
                 <email>colin@ntt.net</email>
