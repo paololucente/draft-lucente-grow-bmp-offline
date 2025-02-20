@@ -373,48 +373,6 @@
                 </t>
             </section>
         </section>
-        <section title="Exporter vs. Station">
-            <t>
-                (DISCUSS: do we allow both exporter and station to generate
-                summaries? Technically there is no problem, but perhaps the
-                results are wasteful/redundant/confusing?)
-            </t>
-            <section title="Exporter use-cases / benefits">
-            <t>
-                TODO 
-            </t>
-        </section>
-
-        <section title="Station use-cases / benefits">
-            <t>
-		The Peer Summary message injection in a BMP feed is done by an online
-		BMP station for consumption by an offline consumer. The advantage of
-		creating summaries at the online BMP station (for example, as opposed
-		to creating them at a BMP exporter) is that it has awareness of how
-		offline data is being organized, for example:
-	    <list style="symbols">
-		<t>
-		    If BMP data is saved in files and a new file is created every five
-		    minutes, it may make sense to include the summary at the beginning
-		    of each file; or 
-		</t>
-		<t>
-		    If BMP data is streamed onto a message bus like Kafka that supports
-		    partitioning, it may be needed to broadcast summaries over each of
-		    the partitions as they may be attended by different consumers.
-		</t>
-	    </list>
-            </t>
-	    <t>
-		A BMP station receiving multiple Peer Up for the same peer should
-		perform state compression and include in the Peer Summary the last
-		one received, based on timestamp, at the time the summary is being
-		generated. In other words, the summary is not meant, for example if
-		a BGP session is flapping, as event reporting and this is left to
-		<xref target="I-D.ietf-grow-bmp-rel">BMP Route Event Logging</xref>.
-	    </t>
-        </section>
-        </section>
         </section>
 
         <section title="Security Considerations">
