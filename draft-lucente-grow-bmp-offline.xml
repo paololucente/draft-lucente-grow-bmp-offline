@@ -94,10 +94,15 @@
             <t>
 		<xref target="RFC7854">BMP (BGP Monitoring Protocol)</xref> is perfectly
 		suited for real-time consumption but less ideal in stream processing and
-		off-wire historical scenario. The main issue is the dependence that parsing
-		BGP Update PDUs has on knowing which capabilities have been agreed when
-		establishing the BGP session with the peers, which could have happened long
-		time ago (days, weeks, months).
+        off-wire historical scenarios. The main issue is that the ability to
+        correctly parse BGP Update PDUs, carried in BMP RouteMonitoring messages,
+        depends on the BGP Capabilities exchanged during the establishment of
+        the BGP session between the peers via BGP Open PDUs. The BGP Open PDUs,
+        carried in BMP PeerUpNotification messages, are exported at the
+        establishment of the BMP session. Similar to BGP, BMP sessions are
+        typically long-lived, so the crucial information to correctly parse
+        subsequent messages of such sessions was possibly sent a relatively long
+        time ago (days, weeks, months).
 	    </t>
         <t>
             This document introduces the concept of Summaries. It defines a new
@@ -105,7 +110,7 @@
             called Summary Id.
             A Summary is similar to the initial synchronisation performed upon
             establishment of the BMP session: all BGP session information is
-            exported in PeerUpNofication messages, and all RIB contents are
+            exported in PeerUpNotification messages, and all RIB contents are
             exported in RouteMonitoring messages. All the messages carry the new
             Summary Id TLV, containing an ID uniquely identifying the summary
             these messages belong to. The messages are preceded by a State
@@ -118,17 +123,22 @@
     <middle>
         <section title="Introduction" anchor="Introduction">
             <t>
-		Correctly parsing BGP Update PDUs included in BMP messages (ie. Route
-		Monitoring) does require a stateful approach by keeping track of
-		capabilities exchanged at BGP Open time as reported by BMP Peer Up
-		messages. 
-	    </t>
+                Correctly parsing BGP Update PDUs included in BMP messages (ie.
+                RouteMonitoring) does require a stateful approach by keeping
+                track of capabilities exchanged in the BGP Open PDUs as reported
+                by BMP PeerUpNotification messages.
+            </t>
 	    <t>
-		The role of Peer Up messages is solely BGP session event logging and
-		the long-lived nature of sessions does pose the problem that a BGP
-		Open message may have been received long time before parsing a BGP
-		Update making challenging a stateful approach based on receipt of
-		Peer Up.
+            PeerUpNotification messages are sent only during the initial
+            synchronisation at the start of the BMP session, or, whenever a BGP
+            session is established on the monitored router.
+            The necessary information in the BGP Open (and PeerUpNotification)
+            messages may thus have been received long before its needed to parse
+            incoming BGP Updates in RouteMonitoring messages. This inevitable
+            stateful approach might be challenging in certain scenarios, such as
+            consuming archived BMP messages or deployments where BMP Stations or
+            processing nodes not necessarily see the (complete) start of every
+            BMP stream.
 	    </t>
 	    <t>
 		<xref target="I-D.ietf-grow-bmp-tlv">TLV support for BMP Route
@@ -143,13 +153,13 @@
 		where resources may be limited.
 	    </t>
         <t>
-        Similar to how the necessary information carried in the BGP OPEN
+        Similar to how the necessary information carried in the BGP Open
         messages is sent from the exporter to the station only in the
         beginning of a BMP session (in forms of PeerUpNotifications), the
         contents of the RIBs is also only sent at the beginning (in forms of
         RouteMonitoring messages). In other words, to make correct and complete
         sense of offline BMP data, both current state (RIB contents) and session
-        details (BGP OPEN Capabilities) to parse future state changes are
+        details (BGP Open Capabilities) to parse future state changes are
         required.
         </t>
 	    <t>
@@ -163,8 +173,8 @@
             identifier for that Summary. The State Summary message further
             contains TLVs with meta-data describing when the Summary was
             created, information on the exporting side such as sysName and IP
-            address, information on the collecting side such as BMP station
-            software name and versions, etc.
+            address, and/or information on the collecting side such as BMP
+            station software name and version, etc.
         </t>
         <t>
             The new concepts described in this document are not restricted to
