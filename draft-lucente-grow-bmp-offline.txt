@@ -271,9 +271,9 @@ Internet-Draft             BMP State Summaries             February 2025
    While this document does define a way to facilitate stream
    processing, replay and, more in general, consumption of raw BMP data
    offline, similar benefits may be harnessed by third party off-wire
+   formats in replay and, more in general, consumption of raw BMP data
+   offline, similar benefits may be harnessed by third party off-wire
    formats in which BMP can be encapsulated into, for example MRT
-   (Multi-Threaded Routing Toolkit) as defined by RFC 6396 [RFC6396].
-   As a result of that, this document does not recommend a preferred way
 
 
 
@@ -282,6 +282,8 @@ Lucente, et al.          Expires 24 August 2025                 [Page 5]
 Internet-Draft             BMP State Summaries             February 2025
 
 
+   (Multi-Threaded Routing Toolkit) as defined by RFC 6396 [RFC6396].
+   As a result of that, this document does not recommend a preferred way
    to stream process or store BMP data offline.
 
 4.  Operational Considerations
@@ -328,8 +330,6 @@ Internet-Draft             BMP State Summaries             February 2025
    create a registry within the BMP group, named "BMP Peer Summary
    Message TLVs".
 
-   Registration procedures for this registry are:
-
 
 
 
@@ -337,6 +337,8 @@ Lucente, et al.          Expires 24 August 2025                 [Page 6]
 
 Internet-Draft             BMP State Summaries             February 2025
 
+
+   Registration procedures for this registry are:
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
@@ -383,8 +385,6 @@ Internet-Draft             BMP State Summaries             February 2025
               Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
-
-
 
 
 
