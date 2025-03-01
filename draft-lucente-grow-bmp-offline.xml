@@ -191,7 +191,7 @@
       <t>
         The State Summary message starts with a BMP Common Header as
         defined in <xref target="RFC7854">Section 4.1 of</xref>.
-        The Common Header is directly followed by non-indexed TLVs. The
+        The Common Header is directly followed by TLVs. The
         Summary Id TLV defined in <xref target="summary-id-tlv"/> MUST be
         present and SHOULD be the first of the TLVs. All additional TLVs listed
         in <xref target="meta-data-tlvs"/> are optional.
@@ -209,7 +209,8 @@
             The Summary Id TLV is the only mandatory TLV of a State
             Summary message as defined in
             <xref target="state-summary-message"/>.
-            It is a non-indexed TLV, structured as defined
+            It is an indexed TLV (as it will be included in RouteMonitoring
+            messages, with index zero), structured as defined
             in
             <xref target="I-D.ietf-grow-bmp-tlv" section="4"/>,
             with a fixed value length of 16 bytes. This allows the
