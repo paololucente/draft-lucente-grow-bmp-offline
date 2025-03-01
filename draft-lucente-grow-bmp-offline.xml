@@ -77,7 +77,7 @@
     <keyword>BMP</keyword>
     <abstract>
       <t>
-        <xref target="RFC7854">BMP (BGP Monitoring Protocol)</xref> is
+        BMP (BGP Monitoring Protocol) is
         perfectly suited for real-time consumption but less ideal in stream
         processing and off-wire historical scenarios. The main issue
         is that the ability to correctly parse BGP Update PDUs,
