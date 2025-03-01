@@ -101,7 +101,7 @@
         exported in Route Monitoring messages. All the messages carry the new
         Summary Id TLV, containing an ID uniquely identifying the summary
         these messages belong to. The messages are preceded by a State
-        Summary message, carrying the same Summary Id TLV, as well as
+        Summary message carrying the same Summary Id TLV, as well as
         meta-data describing the Summary.
       </t>
     </abstract>
