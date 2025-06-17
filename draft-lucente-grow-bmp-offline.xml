@@ -174,6 +174,42 @@
       matter of attaching the Summary Id TLV to those messages. No
       existing message types have to be adapted to support Summaries.
     </t>
+    <section title="Considerations regarding alternative approaches">
+        <t>
+            <em>This section is to be removed/reduced at a later stage.</em>
+        </t>
+
+        <table>
+            <name>
+                Overview of feature/requirement comparison between the approach
+                described in this document and a approach based on Route Refresh
+                messages
+            </name>
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>State Summaries</td>
+                    <td>Route Refresh</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="3">Feature/quality:</td></tr>
+                <tr><td>In-protocol</td>              <td>y</td><td>y</td></tr>
+                <tr><td>Signal being/end</td>         <td>y</td><td>y</td></tr>
+                <tr><td>RIB contents</td>             <td>y</td><td>y</td></tr>
+                <tr><td>Session info</td>             <td>y</td><td>n</td></tr>
+                <tr><td>Distinguish sync vs live</td> <td>y</td><td>n</td></tr>
+                <tr><td>Distinguish between syncs</td><td>y</td><td>n</td></tr>
+                <tr><td>Per address family</td>       <td>y</td><td>y</td></tr>
+                <tr><td>Additional metadata</td>      <td>y</td><td>n</td></tr>
+                <tr><td>Extensible</td>               <td>y</td><td>n</td></tr>
+                <tr><td>Expensive</td>                <td>y</td><td>Less</td></tr>
+
+                <tr><td colspan="3">Protocol requirement:</td></tr>
+                <tr><td>New mesage type or TLV</td>   <td>both</td><td>either</td></tr>
+        </tbody>
+        </table>
+    </section>
     </section>
     <section title="Terminology">
       <t>
