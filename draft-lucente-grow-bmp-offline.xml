@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
-        <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
-        <!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
-	<!ENTITY RFC7854 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7854.xml">
-	<!ENTITY RFC6396 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6396.xml">
-	<!ENTITY I-D.ietf-grow-bmp-tlv SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-tlv.xml">
-	<!ENTITY I-D.ietf-grow-bmp-rel SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-rel.xml">
-	<!ENTITY I-D.petrie-grow-mrt-bmp SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.petrie-grow-mrt-bmp.xml">
-	<!ENTITY IANA_PS_MSG_TYPE "TBD1">
-	<!ENTITY IANA_PS_CODE_PEER_TLV "TBD2">
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
+<!ENTITY RFC7854 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7854.xml">
+<!ENTITY RFC6396 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6396.xml">
+<!ENTITY I-D.ietf-grow-bmp-tlv SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-tlv.xml">
+<!ENTITY I-D.ietf-grow-bmp-rel SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-grow-bmp-rel.xml">
+<!ENTITY I-D.petrie-grow-mrt-bmp SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.petrie-grow-mrt-bmp.xml">
+<!ENTITY IANA_PS_MSG_TYPE "TBD1">
+<!ENTITY IANA_PS_CODE_PEER_TLV "TBD2">
 ]>
-
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc strict="yes" ?>
 <?rfc toc="yes"?>
@@ -19,414 +18,346 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
-
-<rfc category="std" docName="draft-lucente-grow-bmp-offline-01"
-     ipr="trust200902" submissionType="IETF"
-     updates="7854">
-
-    <front>
-        <title>
-	    Making BMP usable offline
-        </title>
-
-        <author fullname="Paolo Lucente" initials="P" surname="Lucente">
-            <organization>NTT</organization>
-            <address>
-                <postal>
-                    <street>Veemweg 23</street>
-                    <city>Barneveld</city>
-                    <code>3771 MT</code>
-                    <country>NL</country>
-                </postal>
-                <email>paolo@ntt.net</email>
-            </address>
-        </author>
-
-        <author fullname="Camilo Cardona" initials="C" surname="Cardona">
-            <organization>NTT</organization>
-            <address>
-                <postal>
-                    <street>164-168, Carrer de Numancia</street>
-                    <city>Barcelona</city>
-                    <code>08029</code>
-                    <country>Spain</country>
-                </postal>
-                <email>camilo@ntt.net</email>
-            </address>
-        </author>
-
-        <author fullname="Colin Petrie" initials="C" surname="Petrie">
-            <organization>NTT</organization>
-            <address>
-                <postal>
-                    <street>Veemweg 23</street>
-                    <city>Barneveld</city>
-                    <code>3771 MT</code>
-                    <country>NL</country>
-                </postal>
-                <email>colin@ntt.net</email>
-            </address>
-        </author>
-
-        <author fullname="Luuk Hendriks" initials="L." surname="Hendriks">
-            <organization>NLnet Labs</organization>
-            <address>
-                <postal>
-                    <street>Science Park 400</street>
-                    <city>Amsterdam</city>
-                    <code>1098 XH</code>
-                    <country>Netherlands</country>
-                </postal>
-                <email>luuk@nlnetlabs.nl</email>
-            </address>
-        </author>
-
-
-        <date year="2025"/>
-
-        <area>General</area>
-
-        <workgroup>Global Routing Operations</workgroup>
-        <keyword>BMP</keyword>
-
-        <abstract>
-            <t>
-		<xref target="RFC7854">BMP (BGP Monitoring Protocol)</xref> is perfectly
-		suited for real-time consumption but less ideal in stream processing and
-		off-wire historical scenario. The main issue is the dependence that parsing
-		BGP Update PDUs has on knowing which capabilities have been agreed when
-		establishing the BGP session with the peers, which could have happened long
-		time ago (days, weeks, months).
-	    </t>
-            <t>
-		This document defines a new optional BMP message type, called Peer Summary,
-		that carries a summary of the established BGP sessions along with their
-		capabilities and that is intended to be injected in the BMP feed at
-		configurable time intervals and/or ad-hoc whenever it is felt necessary to
-		improve fruition of BMP data after it has been collected.
-	    </t>
-        </abstract>
-    </front>
-
-    <middle>
-        <section title="Introduction" anchor="Introduction">
-            <t>
-		Correctly parsing BGP Update PDUs included in BMP messages (ie. Route
-		Monitoring) does require a stateful approach by keeping track of
-		capabilities exchanged at BGP Open time as reported by BMP Peer Up
-		messages. 
-	    </t>
-	    <t>
-		The role of Peer Up messages is solely BGP session event logging and
-		the long-lived nature of sessions does pose the problem that a BGP
-		Open message may have been received long time before parsing a BGP
-		Update making challenging a stateful approach based on receipt of
-		Peer Up.
-	    </t>
-	    <t>
-		<xref target="I-D.ietf-grow-bmp-tlv">TLV support for BMP Route
-		Monitoring and Peer Down Messages</xref> defines a Stateless Parsing
-		TLV aimed at including relevant capabilities that have an impact in
-		BGP Update message parsing as part of optional informational TLV in
-		Route Monitoring messages. While the method is valid, in fact it does
-		allow with minor effort to encapsulate BMP in MRT format for offline
-		consumption as documented by <xref target="I-D.petrie-grow-mrt-bmp">
-		Storing BMP messages in MRT Format</xref>, it comes with some drawbacks
-		like extra verbosity and increased correlation effort at a BMP exporter,
-		where resources may be limited.
-	    </t>
-        <t>
-        Similar to how the necessary information carried in the BGP OPEN
-        messages is sent from the exporter to the station only in the
-        beginning of a BMP session (in forms of PeerUpNotifications), the
-        contents of the RIBs is also only sent at the beginning (in forms of
-        RouteMonitoring messages). In other words, to make correct and complete
-        sense of offline BMP data, both current state (RIB contents) and session
-        details (BGP OPEN Capabilities) to parse future state changes are
-        required.
-        </t>
-	    <t>
-		This document defines a new optional BMP message type named Peer
-		Summary that carries a list of the established BGP sessions, along
-		with their capabilities. The general idea is that a Peer Summary
-		message is composed by a sequence of one or multiple Peer TLVs with
-		the goal of allowing a consumer of BMP data to build the list of
-		established BGP sessions like if the sequence of Peer Up messages
-		was just being received live by a BMP exporter. 
-        </t>
-        <t>
-        To disseminate the RIB contents, no new message type is introduced.
-        Instead, RouteMonitoring messages are used, similarly to how RIB
-        contents are sent at the beginning of a BMP session. To distinguish
-        between such a RIB sync and RouteMonitoring messages representing state
-        changes, this document defines a new 'Summary' flag in the Peer flags
-        field in the Per-Peer header.
-	    </t>
-        <t>
-        The new concepts described in this document are not restricted to
-        either the BMP exporter or the BMP station. Typically, the former might
-        have tighter constraints in terms of resources, and implementing the new
-        concepts there might be less feasible or perhaps unwanted. The
-        <xref target="opcon" format="title"/> includes discussions on pros and
-        cons in various scenarios.
-        </t>
-        </section>
-
-        <section title="Terminology">
-            <t>
-		The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-		NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
-		"MAY", and "OPTIONAL" in this document are to be interpreted as
-		described in BCP 14 <xref target="RFC2119">RFC 2119</xref>
-		<xref target="RFC8174">RFC 8174</xref> when, and only when, they
-		appear in all capitals, as shown here.
-            </t>
-        </section>
-
-        <section title="Peer Summary message format">
-            <t>
-		The Peer Summary message starts with a BMP Common Header as defined
-		in <xref target="RFC7854">Section 4.1 of</xref>. It is followed by
-		a Peers Count which, similarly to how defined for Stats Reports
-		message in <xref target="RFC7854">Section 4.8 of</xref>, tells how
-		many TLVs will follow in the message. The count is then followed by
-		one or multiple Peer TLVs with code-point &IANA_PS_CODE_PEER_TLV;.
-            </t>
-            <t>
-		Each Peer TLV is structured as a non-indexed TLV as defined in <xref
-		target="I-D.ietf-grow-bmp-tlv">Section 3 of</xref>. The value
-		part contains the BMP Common Header and Peer Up Notification
-		body as defined in <xref target="RFC7854">Section 4.10 of</xref>.
-            </t>
-            <t>
-        The Peer Summary message can be generated by a BMP exporter or by a BMP
-        station. It MUST encapsulate only Peer Up data that was actually sent or
-        received, respectively.
-            </t>
-	    <t>
-            <figure anchor="BMP-Peer-Summary-format" align="center">
-                <artwork align="center">
-                    <![CDATA[
-  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-  +-+-+-+-+-+-+-+-+
-  |    Version    |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |                        Message Length                         |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |Msg Type = TBD1|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |                         Peers Count                           |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |      Type = TBD2 (2 octets)   |     Length (2 octets)         |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ~   Value = Per-Peer Header + Peer Up Notification (variable)   ~
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  ~    			  Peer TLV 3 .. N 			  ~
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                    ]]>
-                </artwork>
-            </figure>
-	    </t>
-        <section title="Summary Information TLVs">
-        <t>
-        The Peer Summary message SHOULD carry TLVs providing additional
-        information on the BMP session being summarized. These Summary
-        Information TLVs describe the BMP exporter and station involved,
-        and the date and time the summary was generated.
-        By embedding these TLVs in the offline file, a consumer of the
-        file does not have to rely on the filename or other external
-        data to get these
-        types of information.
-
-        All TLVs are non-indexed. 
-
-        <list style="symbols">
-        <t>
-            Type = TBD3: Datetime of summary
-            <list style="empty">
-            <t>
-                Length: 8 bytes
-            </t>
-            <t>
-                Value: 64bit UNIX epoch, in seconds
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD4: Exporter IP address
-            <list style="empty">
-            <t>
-                Length: 16 bytes
-            </t>
-            <t>
-                Value: IPv6 or IPv4-mapped IPv6 address
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD5: Exporter sysName
-            <list style="empty">
-            <t>
-                Length: variable, non-zero, describing the number of bytes
-            </t>
-            <t>
-                Value: UTF-8 string
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD6: Exporter sysDesc
-            <list style="empty">
-            <t>
-                Length: variable, non-zero, describing the number of bytes
-            </t>
-            <t>
-                Value: UTF-8 string
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD7: Station IP address
-            <list style="empty">
-            <t>
-                Length: variable, non-zero, describing the number of bytes
-            </t>
-            <t>
-                Value: IPv6 or IPv4-mapped IPv6 address
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD8: Station sysName
-            <list style="empty">
-            <t>
-                Length: variable, non-zero, describing the number of bytes
-            </t>
-            <t>
-                Value: UTF-8 string
-            </t>
-            </list>
-        </t>
-        <t>
-            Type = TBD9: Station sysDesc
-            <list style="empty">
-            <t>
-                Length: variable, non-zero, describing the number of bytes
-            </t>
-            <t>
-                Value: UTF-8 string
-            </t>
-            </list>
-        </t>
-
-        </list>
-
-
-            </t>
-        </section>
-        <section title="Summary/synthetic flag">
-    <t>
-        Within the Peer flags field in the Per-Peer Header, as defined in
-        <xref target="RFC7854">Section 4.2 of</xref>, this document defines bit 4
-        as the 'S' bit, indicating the message is part of a summary. Note that
-        contextual information from a Peer Summary message is required to
-        determine whether a message with the 'S' bit set to 1 is generated by
-        the exporter or by the BMP station.
-            <figure anchor="BMP-Peer-Summary-flag" align="center"
-                title="Summary flag"
-            >
-                <artwork align="center">
-                    <![CDATA[
-  0 1 2 3 4 5 6 7
- +-+-+-+-+-+-+-+-+
- |V|L|A|O|S| Rsv |
- +-+-+-+-+-+-+-+-+
-                        ]]>
-                </artwork>
-            </figure>
+<rfc category="std" docName="draft-lucente-grow-bmp-offline-01" ipr="trust200902" submissionType="IETF" updates="7854">
+  <front>
+    <title>
+      BMP State Summaries
+    </title>
+    <author fullname="Paolo Lucente" initials="P" surname="Lucente">
+      <organization>NTT</organization>
+      <address>
+        <postal>
+          <street>Veemweg 23</street>
+          <city>Barneveld</city>
+          <code>3771 MT</code>
+          <country>NL</country>
+        </postal>
+        <email>paolo@ntt.net</email>
+      </address>
+    </author>
+    <author fullname="Camilo Cardona" initials="C" surname="Cardona">
+      <organization>NTT</organization>
+      <address>
+        <postal>
+          <street>164-168, Carrer de Numancia</street>
+          <city>Barcelona</city>
+          <code>08029</code>
+          <country>Spain</country>
+        </postal>
+        <email>camilo@ntt.net</email>
+      </address>
+    </author>
+    <author fullname="Colin Petrie" initials="C" surname="Petrie">
+      <organization>NTT</organization>
+      <address>
+        <postal>
+          <street>Veemweg 23</street>
+          <city>Barneveld</city>
+          <code>3771 MT</code>
+          <country>NL</country>
+        </postal>
+        <email>colin@ntt.net</email>
+      </address>
+    </author>
+    <author fullname="Luuk Hendriks" initials="L" surname="Hendriks">
+      <organization>NLnet Labs</organization>
+      <address>
+        <postal>
+          <street>Science Park 400</street>
+          <city>Amsterdam</city>
+          <code>1098 XH</code>
+          <country>NL</country>
+        </postal>
+        <email>luuk@nlnetlabs.nl</email>
+      </address>
+    </author>
+    <date year="2025"/>
+    <area>General</area>
+    <workgroup>Global Routing Operations</workgroup>
+    <keyword>BMP</keyword>
+    <abstract>
+      <t>
+        BMP (BGP Monitoring Protocol) is
+        perfectly suited for real-time consumption but less ideal in stream
+        processing and off-wire historical scenarios. The main issue
+        is that the ability to correctly parse BGP Update PDUs,
+        carried in BMP Route Monitoring messages, depends on the BGP
+        Capabilities exchanged during the establishment of the BGP
+        session between the peers via BGP Open PDUs. The BGP Open
+        PDUs, carried in BMP Peer Up Notification messages, are exported
+        at the establishment of the BMP session. Similar to BGP, BMP
+        sessions are typically long-lived, so the crucial information
+        to correctly parse subsequent messages of such sessions was
+        possibly sent a relatively long time ago (days, weeks,
+        months).
+      </t>
+      <t>
+        This document introduces the concept of Summaries. It defines a new
+        optional BMP message type, called State Summary, and a new TLV,
+        called Summary Id. A Summary is similar to the initial
+        synchronisation performed upon establishment of the BMP
+        session: all BGP session information is exported in
+        Peer Up Notification messages, and all RIB contents are
+        exported in Route Monitoring messages. All the messages carry the new
+        Summary Id TLV, containing an ID uniquely identifying the summary
+        these messages belong to. The messages are preceded by a State
+        Summary message carrying the same Summary Id TLV, as well as
+        meta-data describing the Summary.
+      </t>
+    </abstract>
+  </front>
+  <middle>
+    <section title="Introduction" anchor="Introduction">
+      <t>
+        Correctly parsing BGP Update PDUs included in BMP messages (ie.
+        Route Monitoring) does require a stateful approach by keeping
+        track of capabilities exchanged in the BGP Open PDUs as reported
+        by BMP Peer Up Notification messages.
+      </t>
+      <t>
+        Peer Up Notification messages are sent only during the initial
+        synchronisation at the start of the BMP session, or, whenever a BGP
+        session is established on the monitored router. The
+        necessary information in the BGP Open (and Peer Up Notification)
+        messages may thus have been received long before its needed to parse
+        incoming BGP Updates in Route Monitoring messages. This inevitable
+        stateful approach might be challenging in certain scenarios, such as
+        consuming archived BMP messages or deployments where BMP Stations or
+        processing nodes not necessarily see the (complete) start of every
+        BMP stream.
+      </t>
+      <t>
+        <xref target="I-D.ietf-grow-bmp-tlv">TLV support for BMP Route
+        Monitoring and Peer Down Messages</xref> defines a Stateless Parsing
+        TLV aimed at including relevant capabilities that have an impact in
+        BGP Update message parsing as part of optional informational TLV in
+        Route Monitoring messages. While the method is valid, in fact it does
+        allow with minor effort to encapsulate BMP in MRT format for offline
+        consumption as documented by
+        <xref target="I-D.petrie-grow-mrt-bmp">
+          Storing BMP messages in MRT Format
+        </xref>, it comes with some drawbacks like extra verbosity and increased
+        correlation effort at a BMP exporter,
+        where resources may be limited.
+      </t>
+      <t>
+      Similar to how the necessary information carried in the BGP Open
+      messages is sent from the exporter to the station only in the
+      beginning of a BMP session (in forms of Peer Up Notifications), the
+      contents of the RIBs is also only sent at the beginning (in forms of
+      Route Monitoring messages). In other words, to make correct and complete
+      sense of offline BMP data, both current state (RIB contents) and session
+      details (BGP Open Capabilities) to parse future state changes are
+      required.
     </t>
+      <t>
+      This document introduces Summaries, enabling synchronisation of both
+      BGP session information and RIB contents anywhere in a BMP session.
+      Summaries are enabled by the new optional State Summary message type
+      and the new Summary Id TLV, both introduced in this document.
+      A Summary is a collection of Peer Up Notification messages,
+      Route Monitoring messages and a single State Summary message, all
+      carrying the newly introduced Summary Id TLV containing the unique
+      identifier for that Summary. The State Summary message further
+      contains TLVs with meta-data describing when the Summary was
+      created, information on the exporting side such as sysName and IP
+      address, and/or information on the collecting side such as BMP
+      station software name and version, etc.
+    </t>
+      <t>
+      The new concepts described in this document are not restricted to
+      either the BMP exporter or the BMP station. By building upon TLVs,
+      supported in all BMP message types from BMPv4, the Summary approach
+      imposes minimal requirements over the initial synchronisation in BMP
+      today. Furthermore, if at any point in the future another message
+      type needs to be incorporated in a Summary, it will be a simple
+      matter of attaching the Summary Id TLV to those messages. No
+      existing message types have to be adapted to support Summaries.
+    </t>
+    </section>
+    <section title="Terminology">
+      <t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+        "OPTIONAL" in this document are to be interpreted as
+        described in BCP 14
+        <xref target="RFC2119">RFC 2119</xref>
+        <xref target="RFC8174">RFC 8174</xref>
+        when, and only when, they
+        appear in all capitals, as shown here.
+      </t>
+    </section>
+    <section title="State Summary message format" anchor="state-summary-message">
+      <t>
+        The State Summary message starts with a BMP Common Header as
+        defined in <xref target="RFC7854">Section 4.1 of</xref>.
+        The Common Header is directly followed by TLVs. The
+        Summary Id TLV defined in <xref target="summary-id-tlv"/> MUST be
+        present and SHOULD be the first of the TLVs. All additional TLVs listed
+        in <xref target="meta-data-tlvs"/> are optional.
+      </t>
+      <t>
+        The State Summary message can be generated by a BMP exporter or
+        by a BMP station, as long as all required data for the
+        Peer Up Notification and Route Monitoring messages pertaining to
+        the Summary are available. The State Summary message MUST be
+        followed by those messages, with the Summary Id TLV attached.
+      </t>
+      <section title="Summary Information TLVs">
+        <section title="Summary Id TLV" anchor="summary-id-tlv">
+          <t>
+            The Summary Id TLV is the only mandatory TLV of a State
+            Summary message as defined in
+            <xref target="state-summary-message"/>.
+            It is an indexed TLV (as it will be included in Route Monitoring
+            messages, with index zero), structured as defined
+            in
+            <xref target="I-D.ietf-grow-bmp-tlv" section="4"/>,
+            with a fixed value length of 16 bytes. This allows the
+            use of UUID identifiers, or provides sufficient space
+            for alternative schemes. Different approaches for schemes
+            are discussed in
+            <xref target="opcon"/>.
+          </t>
         </section>
-        <section title="Third party off-wire encoding formats">
-            <t>
-		While this document does define a way to facilitate stream processing,
-		replay and, more in general, consumption of raw BMP data offline,
-		similar benefits may be harnessed by third party off-wire formats in
-		which BMP can be encapsulated into, for example MRT (Multi-Threaded
-		Routing Toolkit) as defined by <xref target="RFC6396">RFC 6396</xref>.
-		As a result of that, this document does not recommend a preferred way
-		to stream process or store BMP data offline. 
-            </t>
+        <section title="Optional meta-data TLVs" anchor="meta-data-tlvs">
+          <t>
+            The Peer Summary message SHOULD carry TLVs providing additional
+            information on the BMP session being summarized. These Summary
+            Information TLVs describe the BMP exporter and station involved,
+            and the date and time the summary was generated. By embedding
+            these TLVs in the offline file, a consumer of the file does not
+            have to rely on the filename or other external data to get these
+            types of information. All TLVs are non-indexed.
+            <list style="symbols"><t>
+              Type = TBD3: Datetime of summary
+                <list style="empty"><t>
+                  Length: 8 bytes
+                    </t><t>
+                    Value: 64bit UNIX epoch, in seconds
+                </t></list>
+                </t><t>
+                Type = TBD4: Exporter IP address
+                <list style="empty"><t>
+                  Length: 16 bytes
+                    </t><t>
+                    Value: IPv6 or IPv4-mapped IPv6 address
+                </t></list>
+                </t><t>
+                Type = TBD5: Exporter sysName
+                <list style="empty"><t>
+                  Length: variable, non-zero, describing the number of bytes
+                    </t><t>
+                    Value: UTF-8 string
+                </t></list>
+                </t><t>
+                Type = TBD6: Exporter sysDesc
+                <list style="empty"><t>
+                  Length: variable, non-zero, describing the number of bytes
+                    </t><t>
+                    Value: UTF-8 string
+                </t></list>
+                </t><t>
+                Type = TBD7: Station IP address
+                <list style="empty"><t>
+                  Length: variable, non-zero, describing the number of bytes
+                    </t><t>
+                    Value: IPv6 or IPv4-mapped IPv6 address
+                </t></list>
+                </t><t>
+                Type = TBD8: Station sysName
+                <list style="empty"><t>
+                  Length: variable, non-zero, describing the number of bytes
+                    </t><t>
+                    Value: UTF-8 string
+                </t></list>
+                </t><t>
+                Type = TBD9: Station sysDesc
+                <list style="empty"><t>
+                  Length: variable, non-zero, describing the number of bytes
+                    </t><t>
+                    Value: UTF-8 string
+                </t></list>
+            </t></list>
+          </t>
         </section>
+      </section>
+      <section title="Third party off-wire encoding formats">
+        <t>
+          While this document does define a way to facilitate stream processing,
+          replay and, more in general, consumption of raw BMP data offline,
+          similar benefits may be harnessed by third party off-wire formats in
+          replay and, more in general, consumption of raw BMP data offline,
+          similar benefits may be harnessed by third party off-wire formats in
+          which BMP can be encapsulated into, for example MRT (Multi-Threaded
+          Routing Toolkit) as defined by
+          <xref target="RFC6396">RFC 6396</xref>.
+          As a result of that, this document does not recommend a preferred way
+          to stream process or store BMP data offline.
+        </t>
+      </section>
+    </section>
+    <section title="Operational Considerations" anchor="opcon">
+      <section title="Summary Id scheme ">
+        <t>
+          The generation and form of the Summary Ids introduced in this
+          document is left to implementations. This document does not
+          enforce any specific approach, though at least the following
+          points should be considered. Note that implementations are not
+          limited to supporting only one Id scheme, but ideally support
+          multiple schemes via local configuration.
+        </t>
+        <section title="Global uniqueness">
+          <t>
+            In deployments where information is received from multiple
+            BMP vantage points, unique Summary Ids might prove handy or
+            even crucial in order to distinguish Summary A originally
+            sent by BMP exporter X, from Summary B sent by exporter Y.
+            If all exporting processes rely on an algorithm producing
+            globally unique identifiers, e.g. UUID version 4, they all
+            can send out Summaries without possibly using an identical
+            Summary Id generated by another exporter.
+          </t>
         </section>
-
-        <section title="Operational Considerations" anchor="opcon">
-        <section title="Exporter vs. Station">
-            <t>
-                TODO 
-            </t>
-            <section title="Exporter use-cases / benefits">
-            <t>
-                TODO 
-            </t>
+        <section title="Increasing identifiers">
+          <t>
+            Generating (linearly) increasing identifiers enable the BMP
+            station to order Summaries, and, to spot any missing
+            Summaries. Furthermore, in a (long running) BMP session where
+            the exporter generates Summaries, the Summary Id doubles as
+            a counter signalling how many Summaries have been sent so
+            far. Note that some of these can be deduced via
+            other means: ordering of Summaries can be done based
+            on the Timestamp TLV (TBD3), and the number of sent
+            Summaries could be included in the Stats Report
+            message (<xref target="RFC7854" section="4.8"/>).
+          </t>
         </section>
-
-        <section title="Station use-cases / benefits">
-            <t>
-		The Peer Summary message injection in a BMP feed is done by an online
-		BMP station for consumption by an offline consumer. The advantage of
-		creating summaries at the online BMP station (for example, as opposed
-		to creating them at a BMP exporter) is that it has awareness of how
-		offline data is being organized, for example:
-	    <list style="symbols">
-		<t>
-		    If BMP data is saved in files and a new file is created every five
-		    minutes, it may make sense to include the summary at the beginning
-		    of each file; or 
-		</t>
-		<t>
-		    If BMP data is streamed onto a message bus like Kafka that supports
-		    partitioning, it may be needed to broadcast summaries over each of
-		    the partitions as they may be attended by different consumers.
-		</t>
-	    </list>
-            </t>
-	    <t>
-		A BMP station receiving multiple Peer Up for the same peer should
-		perform state compression and include in the Peer Summary the last
-		one received, based on timestamp, at the time the summary is being
-		generated. In other words, the summary is not meant, for example if
-		a BGP session is flapping, as event reporting and this is left to
-		<xref target="I-D.ietf-grow-bmp-rel">BMP Route Event Logging</xref>.
-	    </t>
-        </section>
-        </section>
-        </section>
-
-        <section title="Security Considerations">
-            <t>
-		It is not believed that this document adds any additional security
-		considerations.
-            </t>
-        </section>
-
-        <section title="IANA Considerations">
-            <t>
-		IANA is asked to allocate a new Peer Summary message type in the BMP
-		Message Types registry with value &IANA_PS_MSG_TYPE;. IANA is also
-		asked to to create a registry within the BMP group, named "BMP Peer
-		Summary Message TLVs".
-	    </t>
-	    <t>
-		Registration procedures for this registry are:
-	    </t>
-<texttable>
-        <ttcol align='center'>Range</ttcol>
-        <ttcol align='center'>Registration Procedures</ttcol>
-
+      </section>
+    </section>
+    <section title="Security Considerations">
+      <t>
+        It is not believed that this document adds any additional security
+        considerations.
+      </t>
+    </section>
+    <section title="IANA Considerations">
+      <t>
+        IANA is asked to allocate a new Peer Summary message type in the BMP
+        Message Types registry with value &IANA_PS_MSG_TYPE;. IANA is also asked
+        to to create a registry within the BMP group, named "BMP Peer Summary
+        Message TLVs".
+      </t>
+      <t>
+        Registration procedures for this registry are:
+      </t>
+      <texttable>
+        <ttcol align="center">
+      Range
+    </ttcol>
+        <ttcol align="center">
+      Registration Procedures
+    </ttcol>
         <c>0-32767</c>
         <c>Standards Action</c>
         <c>32768-65530</c>
@@ -435,42 +366,39 @@
         <c>Experimental</c>
         <c>65535</c>
         <c>Reserved</c>
-</texttable>
-	    <t>
-		Initial values for this registry are:
-	    </t>
-<texttable>
-        <ttcol align='center'>Type</ttcol>
-        <ttcol align='center'>Description</ttcol>
-        <ttcol align='center'>Reference</ttcol>
-
+      </texttable>
+      <t>
+        Initial values for this registry are:
+      </t>
+      <texttable>
+        <ttcol align="center">
+      Type
+    </ttcol>
+        <ttcol align="center">
+      Description
+    </ttcol>
+        <ttcol align="center">
+      Reference
+    </ttcol>
         <c>&IANA_PS_CODE_PEER_TLV;</c>
         <c>Peer</c>
-        <c>this document</c> 
-</texttable>
-        </section>
+        <c>this document</c>
+      </texttable>
+    </section>
+  </middle>
+  <back>
+    <references title="Normative References">
+    &RFC2119; &RFC8174;
+    <?rfc include="reference.RFC.7854.xml"?>
+    <?rfc include="reference.RFC.6396.xml"?>
 
-    </middle>
-
-    <back>
-
-        <references title="Normative References">
-		&RFC2119;
-		&RFC8174;
-
-		<?rfc include="reference.RFC.7854.xml"?>
-		<?rfc include="reference.RFC.6396.xml"?>
-
-		&I-D.ietf-grow-bmp-tlv;
-		&I-D.ietf-grow-bmp-rel;
-		&I-D.petrie-grow-mrt-bmp;
-        </references>
-
-        <section anchor="Acknowledgements" title="Acknowledgements" numbered="no">
-            <t>
-		TBD
-            </t>
-        </section>
-
-    </back>
+      &I-D.ietf-grow-bmp-tlv;
+      &I-D.ietf-grow-bmp-rel; &I-D.petrie-grow-mrt-bmp;
+    </references>
+    <section anchor="Acknowledgements" title="Acknowledgements" numbered="no">
+      <t>
+        TBD
+      </t>
+    </section>
+  </back>
 </rfc>
