@@ -176,11 +176,28 @@
       Snapshot. And one State Snapshot messages at the very end, signalling the
       end of the Snapshot, again optionally containing TLVs carrying metadata.
       These TLVs are described in <xref target="meta-data-tlvs"/>.
-
     </t>
-      <t>
+    <section title="Exporter vs Station">
+    <t>
       The new concepts described in this document are not restricted to
-      either the BMP exporter or the BMP station. By building upon TLVs,
+      either the BMP exporter or the BMP station, as all newly introduced pieces
+      are in-protocol and do not rely on any specific characteristic of either
+      exporter or station.
+      However, as the process of emitting a Snapshot can presumably be
+      expensive, it is not to be expected that BMP export implementations on
+      routers will support the concepts introduced in this document. A BMP
+      station on the other hand likely has more resources available, and will
+      have received all the necessary information (in terms of session state and
+      RIB contents) from the router already. To not burden limited routers
+      more than necessary, the authors assume the 'first' BMP station implements
+      the concepts described so any stations 'downstream' can leverage the
+      Snapshot functionality, while not imposing any additional load on the
+      router originally emitting the BMP stream.
+    </t>
+  </section>
+  <section title="Flexibility and extensibility">
+    <t>
+      By building upon TLVs,
       supported in all BMP message types from BMPv4, the Snapshot approach
       imposes minimal requirements over the initial synchronisation in BMP
       today. Furthermore, if at any point in the future another message
@@ -188,6 +205,7 @@
       matter of attaching the Snapshot Id TLV to those messages. No
       existing message types have to be adapted to support Snapshots.
     </t>
+  </section>
     <section title="Considerations regarding alternative approaches">
         <t>
             <em>This section is to be removed/reduced at a later stage.</em>
