@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC2918 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2918.xml">
 <!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
 <!ENTITY RFC7854 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7854.xml">
 <!ENTITY RFC6396 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6396.xml">
@@ -194,6 +195,57 @@
       Snapshot functionality, while not imposing any additional load on the
       router originally emitting the BMP stream.
     </t>
+    <section title="Considerations regarding alternative approaches">
+        <t>
+          <cref>
+            This section is included as a record of discussion, and is to be
+            removed/reduced at a later stage.
+          </cref>
+        </t>
+        <t>
+          Emitting all contents of a RIB is very similar, if not identical, to
+          the process of a Route Refresh <xref target="RFC2918"/>.
+          For routers exporting BMP streams, the assumption is that they support
+          Route Refresh.
+          The authors evaluated if mimicking a Route Refresh could provide
+          functionality similar to State Snapshots, but at lower (computational)
+          cost. While a full overview of key features/requirements is listed in
+          <xref target="tbl-comparison-rr"/>,
+            it was concluded that a Route Refresh lacks (too) many of the
+            features of a Snapshot. Moreover, it would still be considered too
+            expensive to perform on any regular basis on routers.
+        </t>
+        <table anchor="tbl-comparison-rr">
+            <name>
+                Overview of feature/requirement comparison between the approach
+                described in this document and a approach based on Route Refresh
+                messages
+            </name>
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>State Snapshots</td>
+                    <td>Route Refresh</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="3">Feature/quality:</td></tr>
+                <tr><td>In-protocol</td>              <td>y</td><td>y</td></tr>
+                <tr><td>Signal begin/end</td>         <td>y</td><td>y</td></tr>
+                <tr><td>RIB contents</td>             <td>y</td><td>y</td></tr>
+                <tr><td>Session info</td>             <td>y</td><td>n</td></tr>
+                <tr><td>Distinguish sync vs live</td> <td>y</td><td>n</td></tr>
+                <tr><td>Distinguish between syncs</td><td>y</td><td>n</td></tr>
+                <tr><td>Per address family</td>       <td>y</td><td>y</td></tr>
+                <tr><td>Additional metadata</td>      <td>y</td><td>n</td></tr>
+                <tr><td>Extensible</td>               <td>y</td><td>n</td></tr>
+                <tr><td>Expensive</td>                <td>y</td><td>Less</td></tr>
+
+                <tr><td colspan="3">Protocol requirement:</td></tr>
+                <tr><td>New mesage type or TLV</td>   <td>both</td><td>either</td></tr>
+        </tbody>
+        </table>
+    </section>
   </section>
   <section title="Flexibility and extensibility">
     <t>
@@ -270,42 +322,6 @@
 
   </section>
 
-    <section title="Considerations regarding alternative approaches">
-        <t>
-            <em>This section is to be removed/reduced at a later stage.</em>
-        </t>
-
-        <table>
-            <name>
-                Overview of feature/requirement comparison between the approach
-                described in this document and a approach based on Route Refresh
-                messages
-            </name>
-            <thead>
-                <tr>
-                    <td></td>
-                    <td>State Snapshots</td>
-                    <td>Route Refresh</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td colspan="3">Feature/quality:</td></tr>
-                <tr><td>In-protocol</td>              <td>y</td><td>y</td></tr>
-                <tr><td>Signal being/end</td>         <td>y</td><td>y</td></tr>
-                <tr><td>RIB contents</td>             <td>y</td><td>y</td></tr>
-                <tr><td>Session info</td>             <td>y</td><td>n</td></tr>
-                <tr><td>Distinguish sync vs live</td> <td>y</td><td>n</td></tr>
-                <tr><td>Distinguish between syncs</td><td>y</td><td>n</td></tr>
-                <tr><td>Per address family</td>       <td>y</td><td>y</td></tr>
-                <tr><td>Additional metadata</td>      <td>y</td><td>n</td></tr>
-                <tr><td>Extensible</td>               <td>y</td><td>n</td></tr>
-                <tr><td>Expensive</td>                <td>y</td><td>Less</td></tr>
-
-                <tr><td colspan="3">Protocol requirement:</td></tr>
-                <tr><td>New mesage type or TLV</td>   <td>both</td><td>either</td></tr>
-        </tbody>
-        </table>
-    </section>
     </section>
     <section title="Terminology">
       <t>
@@ -526,6 +542,9 @@
 
       &I-D.ietf-grow-bmp-tlv;
       &I-D.ietf-grow-bmp-rel; &I-D.petrie-grow-mrt-bmp;
+    </references>
+    <references title="Informative References">
+    &RFC2918;
     </references>
     <section anchor="Acknowledgements" title="Acknowledgements" numbered="no">
       <t>
