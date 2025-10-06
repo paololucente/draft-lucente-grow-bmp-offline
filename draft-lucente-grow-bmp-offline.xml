@@ -77,19 +77,29 @@
     <keyword>BMP</keyword>
     <abstract>
       <t>
-        BMP (BGP Monitoring Protocol) is
-        perfectly suited for real-time consumption but less ideal in stream
-        processing and off-wire historical scenarios. The main issue
-        is that the ability to correctly parse BGP Update PDUs,
-        carried in BMP Route Monitoring messages, depends on the BGP
-        Capabilities exchanged during the establishment of the BGP
-        session between the peers via BGP Open PDUs. The BGP Open
-        PDUs, carried in BMP Peer Up Notification messages, are exported
-        at the establishment of the BMP session. Similar to BGP, BMP
-        sessions are typically long-lived, so the crucial information
-        to correctly parse subsequent messages of such sessions was
-        possibly sent a relatively long time ago (days, weeks,
-        months).
+        BMP (BGP Monitoring Protocol) is perfectly suited for real-time
+        consumption but less ideal in stream processing and off-wire
+        historical scenarios. The main issue is that the ability to
+        correctly parse BGP Update PDUs, carried in BMP Route Monitoring
+        messages, depends on the BGP Capabilities exchanged during the
+        establishment of the BGP session between the peers via BGP Open
+        PDUs. The BGP Open PDUs, carried in BMP Peer Up Notification
+        messages, are exported at the establishment of the BMP session.
+        Similar to BGP, BMP sessions are typically long-lived, so the
+        crucial information to correctly parse subsequent messages of
+        such sessions was possibly sent a relatively long time ago
+        (days, weeks, months).
+      </t>
+      <t>
+        In addition to that required session state, the state of monitored RIBs
+        is also only exported at the start of the BMP session. Afterwards, only
+        deltas to that state are emitted, in forms of BMP Route Monitoring
+        messages. In order to construct a complete and correct view of the
+        network, one can not rely on those deltas alone. While constructing the
+        state purely on deltas might, eventually, get close to the 'actual'
+        state of the network, there is no control over how long one is working
+        with an incorrect state, nor is there any guaruantee that it ever will
+        be correct.
       </t>
       <t>
         This document introduces the concept of Summaries. It defines a new
