@@ -21,7 +21,7 @@
 <rfc category="std" docName="draft-lucente-grow-bmp-offline-01" ipr="trust200902" submissionType="IETF" updates="7854">
   <front>
     <title>
-      BMP State Summaries
+      BMP State Snapshots
     </title>
     <author fullname="Paolo Lucente" initials="P" surname="Lucente">
       <organization>NTT</organization>
@@ -102,17 +102,17 @@
         be correct.
       </t>
       <t>
-        This document introduces the concept of Summaries. It defines a new
-        optional BMP message type, called State Summary, and a new TLV,
-        called Summary Id. A Summary is similar to the initial
+        This document introduces the concept of Snapshots. It defines a new
+        optional BMP message type, called State Snapshot, and a new TLV,
+        called Snapshot Id. A Snapshot is similar to the initial
         synchronisation performed upon establishment of the BMP
         session: all BGP session information is exported in
         Peer Up Notification messages, and all RIB contents are
         exported in Route Monitoring messages. All the messages carry the new
-        Summary Id TLV, containing an ID uniquely identifying the summary
+        Snapshot Id TLV, containing an ID uniquely identifying the snapshot
         these messages belong to. The messages are preceded by a State
-        Summary message carrying the same Summary Id TLV, as well as
-        meta-data describing the Summary.
+        Snapshot message carrying the same Snapshot Id TLV, as well as
+        meta-data describing the Snapshot.
       </t>
     </abstract>
   </front>
@@ -161,28 +161,32 @@
       required.
     </t>
       <t>
-      This document introduces Summaries, enabling synchronisation of both
+      This document introduces Snapshots, enabling synchronisation of both
       BGP session information and RIB contents anywhere in a BMP session.
-      Summaries are enabled by the new optional State Summary message type
-      and the new Summary Id TLV, both introduced in this document.
-      A Summary is a collection of Peer Up Notification messages,
-      Route Monitoring messages and a single State Summary message, all
-      carrying the newly introduced Summary Id TLV containing the unique
-      identifier for that Summary. The State Summary message further
-      contains TLVs with meta-data describing when the Summary was
-      created, information on the exporting side such as sysName and IP
-      address, and/or information on the collecting side such as BMP
-      station software name and version, etc.
+      A Snapshot is not one single message, but a collection of messages, all
+      containing a Snapshot Id TLV (introduced in this document) carrying the
+      same Snapshot Id. The session state and RIB contents are carried in Peer
+      Up Notification messages and Route Monitoring messages, respectively,
+      exactly like the initial synchronisation upon establishment of a new BMP
+      session.
+      In addition to the Peer Up Notification and Route Monitoring messages, two
+      State Snapshot messages (introduced in this document) are also included in
+      a Snapshot: one preceded all the other messages, signalling the start of
+      the Snapshot and optionally containing TLVs carrying metadata about the
+      Snapshot. And one State Snapshot messages at the very end, signalling the
+      end of the Snapshot, again optionally containing TLVs carrying metadata.
+      These TLVs are described in <xref target="meta-data-tlvs"/>.
+
     </t>
       <t>
       The new concepts described in this document are not restricted to
       either the BMP exporter or the BMP station. By building upon TLVs,
-      supported in all BMP message types from BMPv4, the Summary approach
+      supported in all BMP message types from BMPv4, the Snapshot approach
       imposes minimal requirements over the initial synchronisation in BMP
       today. Furthermore, if at any point in the future another message
-      type needs to be incorporated in a Summary, it will be a simple
-      matter of attaching the Summary Id TLV to those messages. No
-      existing message types have to be adapted to support Summaries.
+      type needs to be incorporated in a Snapshot, it will be a simple
+      matter of attaching the Snapshot Id TLV to those messages. No
+      existing message types have to be adapted to support Snapshots.
     </t>
     <section title="Considerations regarding alternative approaches">
         <t>
@@ -198,7 +202,7 @@
             <thead>
                 <tr>
                     <td></td>
-                    <td>State Summaries</td>
+                    <td>State Snapshots</td>
                     <td>Route Refresh</td>
                 </tr>
             </thead>
@@ -233,28 +237,28 @@
         appear in all capitals, as shown here.
       </t>
     </section>
-    <section title="State Summary message format" anchor="state-summary-message">
+    <section title="State Snapshot message format" anchor="state-snapshot-message">
       <t>
-        The State Summary message starts with a BMP Common Header as
+        The State Snapshot message starts with a BMP Common Header as
         defined in <xref target="RFC7854">Section 4.1 of</xref>.
         The Common Header is directly followed by TLVs. The
-        Summary Id TLV defined in <xref target="summary-id-tlv"/> MUST be
+        Snapshot Id TLV defined in <xref target="snapshot-id-tlv"/> MUST be
         present and SHOULD be the first of the TLVs. All additional TLVs listed
         in <xref target="meta-data-tlvs"/> are optional.
       </t>
       <t>
-        The State Summary message can be generated by a BMP exporter or
+        The State Snapshot message can be generated by a BMP exporter or
         by a BMP station, as long as all required data for the
         Peer Up Notification and Route Monitoring messages pertaining to
-        the Summary are available. The State Summary message MUST be
-        followed by those messages, with the Summary Id TLV attached.
+        the Snapshot are available. The State Snapshot message MUST be
+        followed by those messages, with the Snapshot Id TLV attached.
       </t>
-      <section title="Summary Information TLVs">
-        <section title="Summary Id TLV" anchor="summary-id-tlv">
+      <section title="Snapshot Information TLVs">
+        <section title="Snapshot Id TLV" anchor="snapshot-id-tlv">
           <t>
-            The Summary Id TLV is the only mandatory TLV of a State
-            Summary message as defined in
-            <xref target="state-summary-message"/>.
+            The Snapshot Id TLV is the only mandatory TLV of a State
+            Snapshot message as defined in
+            <xref target="state-snapshot-message"/>.
             It is an indexed TLV (as it will be included in Route Monitoring
             messages, with index zero), structured as defined
             in
@@ -268,15 +272,15 @@
         </section>
         <section title="Optional meta-data TLVs" anchor="meta-data-tlvs">
           <t>
-            The Peer Summary message SHOULD carry TLVs providing additional
-            information on the BMP session being summarized. These Summary
+            The Peer Snapshot message SHOULD carry TLVs providing additional
+            information on the BMP session being summarized. These Snapshot
             Information TLVs describe the BMP exporter and station involved,
-            and the date and time the summary was generated. By embedding
+            and the date and time the snapshot was generated. By embedding
             these TLVs in the offline file, a consumer of the file does not
             have to rely on the filename or other external data to get these
             types of information. All TLVs are non-indexed.
             <list style="symbols"><t>
-              Type = TBD3: Datetime of summary
+              Type = TBD3: Datetime of snapshot
                 <list style="empty"><t>
                   Length: 8 bytes
                     </t><t>
@@ -344,9 +348,9 @@
       </section>
     </section>
     <section title="Operational Considerations" anchor="opcon">
-      <section title="Summary Id scheme ">
+      <section title="Snapshot Id scheme ">
         <t>
-          The generation and form of the Summary Ids introduced in this
+          The generation and form of the Snapshot Ids introduced in this
           document is left to implementations. This document does not
           enforce any specific approach, though at least the following
           points should be considered. Note that implementations are not
@@ -356,26 +360,26 @@
         <section title="Global uniqueness">
           <t>
             In deployments where information is received from multiple
-            BMP vantage points, unique Summary Ids might prove handy or
-            even crucial in order to distinguish Summary A originally
-            sent by BMP exporter X, from Summary B sent by exporter Y.
+            BMP vantage points, unique Snapshot Ids might prove handy or
+            even crucial in order to distinguish Snapshot A originally
+            sent by BMP exporter X, from Snapshot B sent by exporter Y.
             If all exporting processes rely on an algorithm producing
             globally unique identifiers, e.g. UUID version 4, they all
-            can send out Summaries without possibly using an identical
-            Summary Id generated by another exporter.
+            can send out Snapshots without possibly using an identical
+            Snapshot Id generated by another exporter.
           </t>
         </section>
         <section title="Increasing identifiers">
           <t>
             Generating (linearly) increasing identifiers enable the BMP
-            station to order Summaries, and, to spot any missing
-            Summaries. Furthermore, in a (long running) BMP session where
-            the exporter generates Summaries, the Summary Id doubles as
-            a counter signalling how many Summaries have been sent so
+            station to order Snapshots, and, to spot any missing
+            Snapshots. Furthermore, in a (long running) BMP session where
+            the exporter generates Snapshots, the Snapshot Id doubles as
+            a counter signalling how many Snapshots have been sent so
             far. Note that some of these can be deduced via
-            other means: ordering of Summaries can be done based
+            other means: ordering of Snapshots can be done based
             on the Timestamp TLV (TBD3), and the number of sent
-            Summaries could be included in the Stats Report
+            Snapshots could be included in the Stats Report
             message (<xref target="RFC7854" section="4.8"/>).
           </t>
         </section>
@@ -389,9 +393,9 @@
     </section>
     <section title="IANA Considerations">
       <t>
-        IANA is asked to allocate a new Peer Summary message type in the BMP
+        IANA is asked to allocate a new Peer Snapshot message type in the BMP
         Message Types registry with value &IANA_PS_MSG_TYPE;. IANA is also asked
-        to to create a registry within the BMP group, named "BMP Peer Summary
+        to to create a registry within the BMP group, named "BMP Peer Snapshot
         Message TLVs".
       </t>
       <t>
