@@ -6,9 +6,9 @@ Global Routing Operations                                     P. Lucente
 Internet-Draft                                                C. Cardona
 Updates: 7854 (if approved)                                    C. Petrie
 Intended status: Standards Track                                     NTT
-Expires: 9 April 2026                                        L. Hendriks
+Expires: 12 April 2026                                       L. Hendriks
                                                               NLnet Labs
-                                                          6 October 2025
+                                                          9 October 2025
 
 
                           BMP State Snapshots
@@ -53,7 +53,7 @@ Abstract
 
 
 
-Lucente, et al.           Expires 9 April 2026                  [Page 1]
+Lucente, et al.           Expires 12 April 2026                 [Page 1]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 April 2026.
+   This Internet-Draft will expire on 12 April 2026.
 
 Copyright Notice
 
@@ -98,35 +98,42 @@ Table of Contents
      1.3.  Backwards (in)compatibility . . . . . . . . . . . . . . .   6
        1.3.1.  Possible workaround . . . . . . . . . . . . . . . . .   6
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   7
-   3.  State Snapshot message  . . . . . . . . . . . . . . . . . . .   7
-     3.1.  Wireformat  . . . . . . . . . . . . . . . . . . . . . . .   7
-     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   8
-     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   8
+     2.1.  Terms in this document  . . . . . . . . . . . . . . . . .   7
+   3.  State Snapshot message  . . . . . . . . . . . . . . . . . . .   8
+     3.1.  Wireformat  . . . . . . . . . . . . . . . . . . . . . . .   8
+     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   9
+     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   9
    4.  Snapshot Information TLVs . . . . . . . . . . . . . . . . . .   9
      4.1.  Snapshot Id TLV . . . . . . . . . . . . . . . . . . . . .   9
-     4.2.  Snapshot Error TLV  . . . . . . . . . . . . . . . . . . .   9
-     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .   9
+     4.2.  Snapshot Error TLV  . . . . . . . . . . . . . . . . . . .  10
 
 
 
-Lucente, et al.           Expires 9 April 2026                  [Page 2]
+Lucente, et al.           Expires 12 April 2026                 [Page 2]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
 
-   5.  Third party off-wire encoding formats . . . . . . . . . . . .  10
+     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .  10
+   5.  Third party off-wire encoding formats . . . . . . . . . . . .  11
    6.  Operational Considerations  . . . . . . . . . . . . . . . . .  11
      6.1.  End-of-snapshot with an Error TLV . . . . . . . . . . . .  11
      6.2.  Snapshot Id scheme  . . . . . . . . . . . . . . . . . . .  11
-       6.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  11
-       6.2.2.  Increasing identifiers  . . . . . . . . . . . . . . .  11
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
-   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
-     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  12
-     9.2.  Informative References  . . . . . . . . . . . . . . . . .  13
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  13
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  13
+       6.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  12
+       6.2.2.  Increasing identifiers  . . . . . . . . . . . . . . .  12
+     6.3.  Requesting/triggering snapshots . . . . . . . . . . . . .  12
+       6.3.1.  Timer-based . . . . . . . . . . . . . . . . . . . . .  12
+       6.3.2.  Manual triggers . . . . . . . . . . . . . . . . . . .  13
+       6.3.3.  Out-of-band request via other protocols . . . . . . .  13
+   7.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     7.1.  No EoRs in Snapshots  . . . . . . . . . . . . . . . . . .  13
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .  14
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  15
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  15
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
 
 1.  Introduction
 
@@ -158,14 +165,7 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 
 
-
-
-
-
-
-
-
-Lucente, et al.           Expires 9 April 2026                  [Page 3]
+Lucente, et al.           Expires 12 April 2026                 [Page 3]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
@@ -221,7 +221,7 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 
 
-Lucente, et al.           Expires 9 April 2026                  [Page 4]
+Lucente, et al.           Expires 12 April 2026                 [Page 4]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
@@ -277,7 +277,7 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 
 
-Lucente, et al.           Expires 9 April 2026                  [Page 5]
+Lucente, et al.           Expires 12 April 2026                 [Page 5]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
@@ -326,14 +326,14 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 1.3.1.  Possible workaround
 
-   *  Partial support: dropping messages based on Snapshot Id TLV
-      presence
+   *  Partial support on the consuming side: dropping messages based on
+      Snapshot Id TLV presence
 
 
 
 
 
-Lucente, et al.           Expires 9 April 2026                  [Page 6]
+Lucente, et al.           Expires 12 April 2026                 [Page 6]
 
 Internet-Draft             BMP State Snapshots              October 2025
 
@@ -348,6 +348,19 @@ Internet-Draft             BMP State Snapshots              October 2025
       simply skip/drop those messages, and preclude any of the problems
       described above.
 
+   *  In-protocol: Introducing a flag in the Per Peer Header
+
+      Setting a flag for messages that are part of a Snapshot will allow
+      consumers to distinguish between such messages and 'normal' Peer
+      Up Notification and Route Monitoring messages.  An additional
+      benefit of a flag would be the enabling of optimisations on the
+      receiving end, where messages pertaining to a Snapshot can now
+      easily be treated differently (specific queue or thread) or
+      discarded in case the receiver has not interest in Snapshots.
+
+      Note that this approach also requires (minimal) changes to the
+      receiving side, namely the recognition of such a flag.
+
 2.  Terminology
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -355,6 +368,38 @@ Internet-Draft             BMP State Snapshots              October 2025
    "OPTIONAL" in this document are to be interpreted as described in BCP
    14 RFC 2119 [RFC2119] RFC 8174 [RFC8174] when, and only when, they
    appear in all capitals, as shown here.
+
+2.1.  Terms in this document
+
+   Exporter:  The sender of BMP messages over the TCP session.  This
+      could be a router, or a BMP Station sending BMP messages onwards.
+
+   Station:  The receiver of BMP messages.  Colloquially also often
+      called the 'collector'.  A Station receives BMP messages from an
+      Exporter.  If a Station sends out BMP messages, it is considered
+      an Exporter for those egress connections.
+
+   Snapshot:  The logical concept of a collection of Peer Up
+      Notification messages and Route Monitoring messages, preceded and
+      followed by a Snapshot Message.  A Snapshot is not a single
+      message/PDU itself.
+
+   Snapshot Message:  A BMP message type, introduced in this document,
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                 [Page 7]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
+
+      to signal the start or end of a Snapshot.  The first and last
+      message of a Snapshot are of this message type.
+
+   Snapshot message  A BMP message that is part of a Snapshot, but not
+      of type Snapshot Message.  For example, a Route Monitoring message
+      that is part of a Snapshot is considered a Snapshot message.
 
 3.  State Snapshot message
 
@@ -370,29 +415,6 @@ Internet-Draft             BMP State Snapshots              October 2025
    by TLVs.  The Snapshot Id TLV defined in Section 4.1 MUST be present
    and SHOULD be the first of the TLVs.  All additional TLVs listed in
    Section 4.3 are optional.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 9 April 2026                  [Page 7]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
 
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -416,6 +438,17 @@ Internet-Draft             BMP State Snapshots              October 2025
 
       Figure 1: The State Snapshot message wireformat, including the
                 BMP Common Header and the Snapshot Id TLV.
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                 [Page 8]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
    The State Snapshot message can be generated by a BMP exporter or by a
    BMP station, as long as all required data for the Peer Up
@@ -442,14 +475,6 @@ Internet-Draft             BMP State Snapshots              October 2025
    like all other messages comprising the Snapshot.  This Snapshot
    message can also contain meta-data TLVs, most notably the Snapshot
    Error TLV.  If, for whatever reason, the sending side can not
-
-
-
-Lucente, et al.           Expires 9 April 2026                  [Page 8]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
    complete the Snapshot, it MUST send a Snapshot message containing a
    Snapshot Error TLVs to signal the Snapshot is incomplete and/or
    incorrect.  For discussion on operational consequences, see
@@ -466,6 +491,20 @@ Internet-Draft             BMP State Snapshots              October 2025
    value length of 16 bytes.  This allows the use of UUID identifiers,
    or provides sufficient space for alternative schemes.  Different
    approaches for schemes are discussed in Section 6.
+
+
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                 [Page 9]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
 4.2.  Snapshot Error TLV
 
@@ -498,14 +537,6 @@ Internet-Draft             BMP State Snapshots              October 2025
 
          Value: 64bit UNIX epoch, in seconds
 
-
-
-
-Lucente, et al.           Expires 9 April 2026                  [Page 9]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
    *  Type = TBD4: Exporter IP address
 
          Length: 16 bytes
@@ -523,6 +554,13 @@ Internet-Draft             BMP State Snapshots              October 2025
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 10]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
    *  Type = TBD7: Station IP address
 
@@ -554,14 +592,6 @@ Internet-Draft             BMP State Snapshots              October 2025
    As a result of that, this document does not recommend a preferred way
    to stream process or store BMP data offline.
 
-
-
-
-Lucente, et al.           Expires 9 April 2026                 [Page 10]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
 6.  Operational Considerations
 
 6.1.  End-of-snapshot with an Error TLV
@@ -575,6 +605,18 @@ Internet-Draft             BMP State Snapshots              October 2025
    considered.  Note that implementations are not limited to supporting
    only one Id scheme, but ideally support multiple schemes via local
    configuration.
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 11]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
 6.2.1.  Global uniqueness
 
@@ -597,12 +639,103 @@ Internet-Draft             BMP State Snapshots              October 2025
    the Timestamp TLV (TBD3), and the number of sent Snapshots could be
    included in the Stats Report message (Section 4.8 of [RFC7854]).
 
-7.  Security Considerations
+6.3.  Requesting/triggering snapshots
+
+   BMP being a unidirectional protocol from exporter to station means
+   there is no way for a station to request or trigger the creation of a
+   Snapshot in-protocol.  This document does not define or advocate for
+   any specific out-of-band way to do such triggering.  But as any
+   implementation of Snapshots requires at least one way to trigger
+   their creation, some possible approaches are briefly discussed.
+
+6.3.1.  Timer-based
+
+   An exporter could be configured to generate and emit Snapshots on a
+   regular interval, without a request from the station.  Depending on
+   the timing parameters and the size of the Snapshots (i.e, the amount
+   of sessions and routes), this might cause high loads on either or
+   both sides of the BMP session.  This approach should only be
+   considered if the station needs a full view on a regular basis, which
+   is not necessary in typical deployments.
+
+   A timer-based approach could be a suitable approach for a station
+   generating Snapshots and writing them to persistent storage, e.g.
+   doing time-binned historical archiving.
+
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 12]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
+
+6.3.2.  Manual triggers
+
+   In situations where a Snapshot is only used to recover from a broken
+   state at a station (either directly connected to the exporter or a
+   station further downstream), a dedicated command on the exporter to
+   generate and emit a Snapshot could be used.
+
+   Note that, for most situations where the station is directly
+   connected to the exporter, a re-establishing the TCP connection for
+   the BMP stream might be a simpler and perhaps even cheaper
+   alternative.
+
+6.3.3.  Out-of-band request via other protocols
+
+   For more complex setups where e.g. the BMP messages continue on a
+   messages bus, the generation and sending of Snapshots could be
+   requested via that message bus or another protocol/API.  Such
+   requests could include parameters to ask for a Snapshot containing
+   only a subset of all the data, e.g. only a certain address family, or
+   only a certain RIB view.  The concept of Snapshots as described in
+   this document allows for such subsets, but such an out-of-band
+   protocol and its parameters are out of scope.
+
+7.  Discussion
+
+7.1.  No EoRs in Snapshots
+
+   This document describes the logical concept of a Snapshot as a
+   collection of Peer Up Notifications and Route Monitoring messages,
+   preceded and followed by a Snapshot Message.  Comparing this to the
+   initial synchronisation at the start of a BMP session, there is a
+   discrepancy, as the Snapshot does not include EoRs to signal a RIB
+   (view) has been fully sent.  An EoR in this context is a
+   RouteMonitoring message for a certain RIB view (e.g. Adj-RIB-In Post-
+   policy, as defined by the flags in the Per Peer Header), containing a
+   BGP Update for a certain address family with no announcements and no
+   withdrawals.
+
+   With the Snapshot Message signalling end-of-snapshot, the EoRs are
+   not a necessity.  One reason for inclusion would be consistency,
+   though the current state of EoRs seems to be inconsistent between
+   implementations, and the text describing them leaves room for
+   interpretation.  Including EoRs in a Snapshot perhaps only adds to
+   the confusion, and therefore leaving them out could be preferable.
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 13]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
+
+8.  Security Considerations
 
    It is not believed that this document adds any additional security
    considerations.
 
-8.  IANA Considerations
+9.  IANA Considerations
 
    IANA is asked to allocate a new Peer Snapshot message type in the BMP
    Message Types registry with value TBD1.  IANA is also asked to to
@@ -610,13 +743,6 @@ Internet-Draft             BMP State Snapshots              October 2025
    Message TLVs".
 
    Registration procedures for this registry are:
-
-
-
-Lucente, et al.           Expires 9 April 2026                 [Page 11]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
@@ -642,9 +768,9 @@ Internet-Draft             BMP State Snapshots              October 2025
 
                                  Table 3
 
-9.  References
+10.  References
 
-9.1.  Normative References
+10.1.  Normative References
 
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
@@ -652,6 +778,13 @@ Internet-Draft             BMP State Snapshots              October 2025
               Internet-Draft, draft-ietf-grow-bmp-rel-04, 3 September
               2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
               grow-bmp-rel-04>.
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 14]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
    [I-D.ietf-grow-bmp-tlv]
               Lucente, P. and Y. Gu, "BMP v4: TLV Support for BGP
@@ -666,13 +799,6 @@ Internet-Draft             BMP State Snapshots              October 2025
               Progress, Internet-Draft, draft-petrie-grow-mrt-bmp-00, 1
               November 2019, <https://datatracker.ietf.org/doc/html/
               draft-petrie-grow-mrt-bmp-00>.
-
-
-
-Lucente, et al.           Expires 9 April 2026                 [Page 12]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -693,7 +819,7 @@ Internet-Draft             BMP State Snapshots              October 2025
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [RFC2918]  Chen, E., "Route Refresh Capability for BGP-4", RFC 2918,
               DOI 10.17487/RFC2918, September 2000,
@@ -704,6 +830,17 @@ Acknowledgements
    TBD
 
 Authors' Addresses
+
+
+
+
+
+
+
+Lucente, et al.           Expires 12 April 2026                [Page 15]
+
+Internet-Draft             BMP State Snapshots              October 2025
+
 
    Paolo Lucente
    NTT
@@ -719,15 +856,6 @@ Authors' Addresses
    08029 Barcelona
    Spain
    Email: camilo@ntt.net
-
-
-
-
-
-
-Lucente, et al.           Expires 9 April 2026                 [Page 13]
-
-Internet-Draft             BMP State Snapshots              October 2025
 
 
    Colin Petrie
@@ -765,20 +893,4 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 9 April 2026                 [Page 14]
+Lucente, et al.           Expires 12 April 2026                [Page 16]
