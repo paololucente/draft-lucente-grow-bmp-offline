@@ -333,7 +333,6 @@
         </list>
       </t>
     </section>
-
   </section>
 
     </section>
@@ -582,6 +581,31 @@
             message (<xref target="RFC7854" section="4.8"/>).
           </t>
         </section>
+      </section>
+    </section>
+    <section title="Discussion">
+      <section title="No EoRs in Snapshots">
+        <t>
+          This document describes the logical concept of a Snapshot as a
+          collection of Peer Up Notifications and Route Monitoring messages,
+          preceded and followed by a Snapshot Message. Comparing this to the
+          initial synchronisation at the start of a BMP session, there is a
+          discrepancy, as the Snapshot does not include EoRs to signal a RIB
+          (view) has been fully sent. An EoR in this context is a
+          RouteMonitoring message for a certain RIB view (e.g. Adj-RIB-In
+          Post-policy, as defined by the flags in the Per Peer Header),
+          containing a BGP Update for a certain address family with no
+          announcements and no withdrawals.
+        </t>
+        <t>
+          With the Snapshot Message signalling end-of-snapshot, the EoRs are not
+          a necessity. One reason for inclusion would be consistency, though the
+          current state of EoRs seems to be inconsistent between
+          implementations, and the text describing them leaves room for
+          interpretation. Including EoRs in a Snapshot perhaps only
+          adds to the confusion, and therefore leaving them out could be
+          preferable.
+        </t>
       </section>
     </section>
     <section title="Security Considerations">
