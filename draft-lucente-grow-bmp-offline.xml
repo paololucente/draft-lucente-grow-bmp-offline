@@ -347,6 +347,50 @@
         when, and only when, they
         appear in all capitals, as shown here.
       </t>
+      <section title="Terms in this document">
+        <dl>
+          <dt>Exporter:</dt>
+          <dd>
+            <t>
+              The sender of BMP messages over the TCP session. This could be a
+              router, or a BMP Station sending BMP messages onwards.
+            </t>
+          </dd>
+          <dt>Station:</dt>
+          <dd>
+            <t>
+              The receiver of BMP messages. Colloquially also often called the
+              'collector'. A Station receives BMP messages from an Exporter. If
+              a Station sends out BMP messages, it is considered an Exporter for
+              those egress connections.
+            </t>
+          </dd>
+          <dt>Snapshot:</dt>
+          <dd>
+            <t>
+              The logical concept of a collection of Peer Up Notification
+              messages and Route Monitoring messages, preceded and followed by a
+              Snapshot Message. A Snapshot is not a single message/PDU itself.
+            </t>
+          </dd>
+          <dt>Snapshot Message:</dt>
+          <dd>
+            <t>
+              A BMP message type, introduced in this document, to signal the
+              start or end of a Snapshot. The first and last message of a
+              Snapshot are of this message type.
+            </t>
+          </dd>
+          <dt>Snapshot message</dt>
+          <dd>
+            <t>
+              A BMP message that is part of a Snapshot, but not of type Snapshot
+              Message. For example, a Route Monitoring message that is part of a
+              Snapshot is considered a Snapshot message.
+            </t>
+          </dd>
+        </dl>
+      </section>
     </section>
     <section title="State Snapshot message" anchor="state-snapshot-message">
       <t>
