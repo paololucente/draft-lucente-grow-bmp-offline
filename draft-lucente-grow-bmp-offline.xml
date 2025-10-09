@@ -298,7 +298,8 @@
       <t>
         <list style="symbols">
           <t>
-            Partial support: dropping messages based on Snapshot Id TLV presence
+            Partial support on the consuming side: dropping messages based on
+            Snapshot Id TLV presence
             <t>
               If a station implementation does not support State Snapshots, it
               should be able to recognize Snapshot Id TLVs relatively easily.
@@ -311,11 +312,24 @@
               described above.
             </t>
             <t>
-              
             </t>
-
           </t>
-
+          <t>
+            In-protocol: Introducing a flag in the Per Peer Header
+            <t>
+              Setting a flag for messages that are part of a Snapshot will allow
+              consumers to distinguish between such messages and 'normal' Peer
+              Up Notification and Route Monitoring messages. An additional
+              benefit of a flag would be the enabling of optimisations on
+              the receiving end, where messages pertaining to a Snapshot can now
+              easily be treated differently (specific queue or thread) or
+              discarded in case the receiver has not interest in Snapshots.
+            </t>
+            <t>
+              Note that this approach also requires (minimal) changes to the
+              receiving side, namely the recognition of such a flag.
+            </t>
+          </t>
         </list>
       </t>
     </section>
