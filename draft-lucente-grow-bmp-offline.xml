@@ -626,6 +626,59 @@
           </t>
         </section>
       </section>
+      <section title="Requesting/triggering snapshots">
+        <t>
+          BMP being a unidirectional protocol from exporter to station means there
+          is no way for a station to request or trigger the creation of a
+          Snapshot in-protocol. This document does not define or advocate for any
+          specific out-of-band way to do such triggering. But as any
+          implementation of Snapshots requires at least one way to trigger their
+          creation, some possible approaches are briefly discussed.
+        </t>
+        <section title="Timer-based">
+          <t>
+            An exporter could be configured to generate and emit Snapshots on a
+            regular interval, without a request from the station. Depending on
+            the timing parameters and the size of the Snapshots (i.e, the
+            amount of sessions and routes), this might cause high loads on
+            either or both sides of the BMP session. This approach should only
+            be considered if the station needs a full view on a regular basis,
+            which is not necessary in typical deployments.
+          </t>
+          <t>
+            A timer-based approach could be a suitable approach for a station
+            generating Snapshots and writing them to persistent storage, e.g.
+            doing time-binned historical archiving.
+          </t>
+        </section>
+        <section title="Manual triggers">
+          <t>
+            In situations where a Snapshot is only used to recover from a broken
+            state at a station (either directly connected to the exporter or a
+            station further downstream), a dedicated command on the exporter to
+            generate and emit a Snapshot could be used. 
+          </t>
+          <t>
+            Note that, for most situations where the station is directly
+            connected to the exporter, a re-establishing the TCP connection for
+            the BMP stream might be a simpler and perhaps even cheaper
+            alternative.
+          </t>
+        </section>
+        <section title="Out-of-band request via other protocols">
+          <t>
+            For more complex setups where e.g. the BMP messages continue on
+            a messages bus, the generation and sending of Snapshots could be
+            requested via that message bus or another protocol/API. Such
+            requests could include parameters to ask for a Snapshot containing
+            only a subset of all the data, e.g. only a certain address family,
+            or only a certain RIB view.
+            The concept of Snapshots as described in this document allows
+            for such subsets, but such an out-of-band protocol and its
+            parameters are out of scope.
+          </t>
+        </section>
+      </section>
     </section>
     <section title="Discussion">
       <section title="No EoRs in Snapshots">
