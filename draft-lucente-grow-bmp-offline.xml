@@ -24,6 +24,18 @@
     <title>
       BMP State Snapshots
     </title>
+    <author fullname="Luuk Hendriks" initials="L" surname="Hendriks">
+      <organization>NLnet Labs</organization>
+      <address>
+        <postal>
+          <street>Science Park 400</street>
+          <city>Amsterdam</city>
+          <code>1098 XH</code>
+          <country>NL</country>
+        </postal>
+        <email>luuk@nlnetlabs.nl</email>
+      </address>
+    </author>
     <author fullname="Paolo Lucente" initials="P" surname="Lucente">
       <organization>NTT</organization>
       <address>
@@ -58,18 +70,6 @@
           <country>NL</country>
         </postal>
         <email>colin@ntt.net</email>
-      </address>
-    </author>
-    <author fullname="Luuk Hendriks" initials="L" surname="Hendriks">
-      <organization>NLnet Labs</organization>
-      <address>
-        <postal>
-          <street>Science Park 400</street>
-          <city>Amsterdam</city>
-          <code>1098 XH</code>
-          <country>NL</country>
-        </postal>
-        <email>luuk@nlnetlabs.nl</email>
       </address>
     </author>
     <date year="2025"/>
