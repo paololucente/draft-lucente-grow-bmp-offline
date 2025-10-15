@@ -511,7 +511,7 @@
       </section>
       <section title="Optional meta-data TLVs" anchor="meta-data-tlvs">
         <t>
-          The Peer Snapshot message SHOULD carry TLVs providing additional
+          The Snapshot message SHOULD carry TLVs providing additional
           information on the BMP session being summarized. These Snapshot
           Information TLVs describe the BMP exporter and station involved,
           and the date and time the snapshot was generated. By embedding
@@ -713,9 +713,9 @@
     </section>
     <section title="IANA Considerations">
       <t>
-        IANA is asked to allocate a new Peer Snapshot message type in the BMP
+        IANA is asked to allocate a new Snapshot message type in the BMP
         Message Types registry with value &IANA_PS_MSG_TYPE;. IANA is also asked
-        to to create a registry within the BMP group, named "BMP Peer Snapshot
+        to to create a registry within the BMP group, named "BMP Snapshot
         Message TLVs".
       </t>
       <t>
