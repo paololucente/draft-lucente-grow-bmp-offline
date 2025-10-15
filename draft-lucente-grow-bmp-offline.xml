@@ -19,7 +19,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
 <?rfc subcompact="no" ?>
-<rfc category="std" docName="draft-lucente-grow-bmp-offline-01" ipr="trust200902" submissionType="IETF" updates="7854">
+<rfc category="std" docName="draft-lucente-grow-bmp-offline-02" ipr="trust200902" submissionType="IETF" updates="7854">
   <front>
     <title>
       BMP State Snapshots
