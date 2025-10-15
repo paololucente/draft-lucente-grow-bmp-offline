@@ -258,82 +258,6 @@
       existing message types have to be adapted to support Snapshots.
     </t>
   </section>
-  <section title="Backwards (in)compatibility">
-    <t>
-      If an implementation lacking support for Snapshots receives a Snapshot, it
-      should ignore the State Snapshot messages and the Snapshot Id TLVs, as
-      these are all optional. However, this reduces a Snapshot to a bunch of
-      Peer Up Notification and Route Monitoring messages indistinguishable from
-      'normal' Peer Up Notification and Route Monitoring messages. This
-      introduces the following problems:
-      <list style="symbols">
-        <t>
-          Peer Up Notifications from a Snapshot will be interpreted as normal
-          Peer Up Notifications, though for a peer that was already considered
-          'up'. This situation is not explicitly described in
-          <xref target="RFC7854" section="3.3"/>,
-          and can be considered unexpected.
-          Even though application of Peer Up Notifications could be considered
-          idempotent (the state after processing the message is 'this peer is
-          up' regardless of how often that message is received and processed),
-          receiving the message implicitly signals the peer was down
-          before, which is incorrect, and is possibly a source of confusion.
-        </t>
-        <t>
-          Route Monitoring messages from a Snapshot interpreted as normal Route
-          Monitoring messages would not come as unexpected in the life cycle of
-          a BMP session. Similarly to Peer Up Notification messages, their
-          application is idempotent in nature as the result of processing the
-          message is 'this route is reachable'. Note that Route Monitoring
-          messages from a Snapshot will always be announcements, not
-          withdrawals. However, as with Peer Up Notification messages, a normal
-          Route Monitoring message implicitly signals 'this route was not
-          reachable before', which is incorrect in the case of Route Monitoring
-          messages that were actually part of a Snapshot.
-        </t>
-      </list>
-    </t>
-
-    <section title="Possible workaround">
-      <t>
-        <list style="symbols">
-          <t>
-            Partial support on the consuming side: dropping messages based on
-            Snapshot Id TLV presence
-            <t>
-              If a station implementation does not support State Snapshots, it
-              should be able to recognize Snapshot Id TLVs relatively easily.
-              With BMPv4, the BGP Update is carried in a TLV in the Route
-              Monitoring message, so any implementation will be able to process
-              TLVs to a certain extent. It then only needs to be aware of the
-              type code of the Snapshot Id TLV type: as all messages in a
-              Snapshot will carry a TLV of this type, the implementation can
-              simply skip/drop those messages, and preclude any of the problems
-              described above.
-            </t>
-            <t>
-            </t>
-          </t>
-          <t>
-            In-protocol: Introducing a flag in the Per Peer Header
-            <t>
-              Setting a flag for messages that are part of a Snapshot will allow
-              consumers to distinguish between such messages and 'normal' Peer
-              Up Notification and Route Monitoring messages. An additional
-              benefit of a flag would be the enabling of optimisations on
-              the receiving end, where messages pertaining to a Snapshot can now
-              easily be treated differently (specific queue or thread) or
-              discarded in case the receiver has not interest in Snapshots.
-            </t>
-            <t>
-              Note that this approach also requires (minimal) changes to the
-              receiving side, namely the recognition of such a flag.
-            </t>
-          </t>
-        </list>
-      </t>
-    </section>
-  </section>
 
     </section>
     <section title="Terminology">
@@ -571,6 +495,82 @@
         </t>
       </section>
     </section>
+  <section title="Backwards (in)compatibility">
+    <t>
+      If an implementation lacking support for Snapshots receives a Snapshot, it
+      should ignore the State Snapshot messages and the Snapshot Id TLVs, as
+      these are all optional. However, this reduces a Snapshot to a bunch of
+      Peer Up Notification and Route Monitoring messages indistinguishable from
+      'normal' Peer Up Notification and Route Monitoring messages. This
+      introduces the following problems:
+      <list style="symbols">
+        <t>
+          Peer Up Notifications from a Snapshot will be interpreted as normal
+          Peer Up Notifications, though for a peer that was already considered
+          'up'. This situation is not explicitly described in
+          <xref target="RFC7854" section="3.3"/>,
+          and can be considered unexpected.
+          Even though application of Peer Up Notifications could be considered
+          idempotent (the state after processing the message is 'this peer is
+          up' regardless of how often that message is received and processed),
+          receiving the message implicitly signals the peer was down
+          before, which is incorrect, and is possibly a source of confusion.
+        </t>
+        <t>
+          Route Monitoring messages from a Snapshot interpreted as normal Route
+          Monitoring messages would not come as unexpected in the life cycle of
+          a BMP session. Similarly to Peer Up Notification messages, their
+          application is idempotent in nature as the result of processing the
+          message is 'this route is reachable'. Note that Route Monitoring
+          messages from a Snapshot will always be announcements, not
+          withdrawals. However, as with Peer Up Notification messages, a normal
+          Route Monitoring message implicitly signals 'this route was not
+          reachable before', which is incorrect in the case of Route Monitoring
+          messages that were actually part of a Snapshot.
+        </t>
+      </list>
+    </t>
+
+    <section title="Possible workaround">
+      <t>
+        <list style="symbols">
+          <t>
+            Partial support on the consuming side: dropping messages based on
+            Snapshot Id TLV presence
+            <t>
+              If a station implementation does not support State Snapshots, it
+              should be able to recognize Snapshot Id TLVs relatively easily.
+              With BMPv4, the BGP Update is carried in a TLV in the Route
+              Monitoring message, so any implementation will be able to process
+              TLVs to a certain extent. It then only needs to be aware of the
+              type code of the Snapshot Id TLV type: as all messages in a
+              Snapshot will carry a TLV of this type, the implementation can
+              simply skip/drop those messages, and preclude any of the problems
+              described above.
+            </t>
+            <t>
+            </t>
+          </t>
+          <t>
+            In-protocol: Introducing a flag in the Per Peer Header
+            <t>
+              Setting a flag for messages that are part of a Snapshot will allow
+              consumers to distinguish between such messages and 'normal' Peer
+              Up Notification and Route Monitoring messages. An additional
+              benefit of a flag would be the enabling of optimisations on
+              the receiving end, where messages pertaining to a Snapshot can now
+              easily be treated differently (specific queue or thread) or
+              discarded in case the receiver has not interest in Snapshots.
+            </t>
+            <t>
+              Note that this approach also requires (minimal) changes to the
+              receiving side, namely the recognition of such a flag.
+            </t>
+          </t>
+        </list>
+      </t>
+    </section>
+  </section>
     <section title="Third party off-wire encoding formats">
       <t>
         While this document does define a way to facilitate stream processing,
