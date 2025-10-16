@@ -494,8 +494,9 @@
           messages from a Snapshot will always be announcements, not
           withdrawals. However, as with Peer Up Notification messages, a normal
           Route Monitoring message implicitly signals 'this route was not
-          reachable before', which is incorrect in the case of Route Monitoring
-          messages that were actually part of a Snapshot.
+          reachable before' or 'attributes for this route have changed',
+          which is incorrect in the case of Route Monitoring messages that were
+          actually part of a Snapshot.
         </t>
       </list>
     </t>
