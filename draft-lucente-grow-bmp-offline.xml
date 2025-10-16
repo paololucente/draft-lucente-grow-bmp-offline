@@ -557,6 +557,16 @@
     <section title="Operational Considerations" anchor="opcon">
       <section title="End-of-snapshot with an Error TLV" anchor="snapshot-error">
         <t>
+          Receiving a Snapshot Message containing a Snapshot Error TLV signals
+          the Snapshot is incomplete or incorrect. Possible actions at this
+          point depend on the situation, on who is consuming the Snapshot, and
+          to which end. In an online scenario where the Snapshot was explicitly
+          requested (see also <xref target="sec-trigger"/>), one could opt for a
+          retry by requesting another Snapshot.
+          If one encounters an Error TLV in a Snapshot Message part of archived,
+          offline data, there is no way to request a new Snapshot. While such a
+          Snapshot could be used to infer some things, it can not be used to
+          rebuild a complete view of the network.
         </t>
       </section>
       <section title="Snapshot Id scheme ">
@@ -595,7 +605,7 @@
           </t>
         </section>
       </section>
-      <section title="Requesting/triggering snapshots">
+      <section title="Requesting/triggering snapshots" anchor="sec-trigger">
         <t>
           BMP being a unidirectional protocol from exporter to station means there
           is no way for a station to request or trigger the creation of a
