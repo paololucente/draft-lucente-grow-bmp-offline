@@ -80,104 +80,73 @@
       <t>
         BMP (BGP Monitoring Protocol) is perfectly suited for real-time
         consumption but less ideal in stream processing and off-wire
-        historical scenarios. The main issue is that the ability to
-        correctly parse BGP Update PDUs, carried in BMP Route Monitoring
-        messages, depends on the BGP Capabilities exchanged during the
-        establishment of the BGP session between the peers via BGP Open
-        PDUs. The BGP Open PDUs, carried in BMP Peer Up Notification
-        messages, are exported at the establishment of the BMP session.
-        Similar to BGP, BMP sessions are typically long-lived, so the
-        crucial information to correctly parse subsequent messages of
-        such sessions was possibly sent a relatively long time ago
-        (days, weeks, months).
-      </t>
-      <t>
-        In addition to that required session state, the state of monitored RIBs
-        is also only exported at the start of the BMP session. Afterwards, only
-        deltas to that state are emitted, in forms of BMP Route Monitoring
-        messages. In order to construct a complete and correct view of the
-        network, one can not rely on those deltas alone. While constructing the
-        state purely on deltas might, eventually, get close to the 'actual'
-        state of the network, there is no control over how long one is working
-        with an incorrect state, nor is there any guaruantee that it ever will
-        be correct.
-      </t>
-      <t>
-        This document introduces the concept of Snapshots. It defines a new
-        optional BMP message type, called State Snapshot, and a new TLV,
-        called Snapshot Id. A Snapshot is similar to the initial
-        synchronisation performed upon establishment of the BMP
-        session: all BGP session information is exported in
-        Peer Up Notification messages, and all RIB contents are
-        exported in Route Monitoring messages. All the messages carry the new
-        Snapshot Id TLV, containing an ID uniquely identifying the snapshot
-        these messages belong to. The messages are preceded by a State
-        Snapshot message carrying the same Snapshot Id TLV, as well as
-        meta-data describing the Snapshot.
+        historical scenarios. The issue is that the necessary information to
+        produce a complete view and enabling correct processing of all messages
+        in the stream, is only sent out at the beginning of the BMP session.
+        This document introduces the concept of BMP Snapshots, enabling BMP
+        stations to synchronize mid-stream, and, providing the basis for
+        self-contained, time-binned archiving of BMP data.
       </t>
     </abstract>
   </front>
   <middle>
     <section title="Introduction" anchor="Introduction">
       <t>
-        Correctly parsing BGP Update PDUs included in BMP messages (ie.
-        Route Monitoring) does require a stateful approach by keeping
-        track of capabilities exchanged in the BGP Open PDUs as reported
-        by BMP Peer Up Notification messages.
+        BMP (BGP Monitoring Protocol) is perfectly suited for real-time
+        consumption but less ideal in stream processing and off-wire
+        historical scenarios. The issue is that the necessary information to
+        produce a complete view and enabling correct processing of all messages
+        in the stream, is only sent out at the beginning of the BMP session.
+        This document introduces the concept of BMP Snapshots, enabling BMP
+        stations to synchronize mid-stream, and, providing the basis for
+        self-contained, time-binned archiving of BMP data.
       </t>
       <t>
-        Peer Up Notification messages are sent only during the initial
-        synchronisation at the start of the BMP session, or, whenever a BGP
-        session is established on the monitored router. The
-        necessary information in the BGP Open (and Peer Up Notification)
-        messages may thus have been received long before its needed to parse
-        incoming BGP Updates in Route Monitoring messages. This inevitable
-        stateful approach might be challenging in certain scenarios, such as
-        consuming archived BMP messages or deployments where BMP Stations or
-        processing nodes not necessarily see the (complete) start of every
-        BMP stream.
+        At the very start of a BMP session, two types of information are
+        sent from exporter to monitor. Firstly, session state, describing all
+        established BGP sessions on the monitored router. Secondly, the RIB
+        contents, i.e. all the routes the monitored router has learned thus far.
+        Missing either of these cause different problems: the session state
+        contains information (Capabilities in the BGP Open messages,
+        encapsulated in the Peer Up Notification) crucial to correctly parse
+        messages in the stream, and the RIB contents represent the starting
+        state to apply deltas (BGP Updates encapsulated in Route Monitoring
+        messages) in the BMP stream to.
+        In order to construct a complete and correct view of the
+        network, one can not rely on those deltas alone. While constructing the
+        state purely on deltas might, eventually, get close to the 'actual'
+        state of the network, there is no control over how long one is working
+        with an incorrect state, nor is there any guarantee that it ever will
+        be correct.
       </t>
       <t>
-        <xref target="I-D.ietf-grow-bmp-tlv">TLV support for BMP Route
-        Monitoring and Peer Down Messages</xref> defines a Stateless Parsing
-        TLV aimed at including relevant capabilities that have an impact in
-        BGP Update message parsing as part of optional informational TLV in
-        Route Monitoring messages. While the method is valid, in fact it does
-        allow with minor effort to encapsulate BMP in MRT format for offline
-        consumption as documented by
-        <xref target="I-D.petrie-grow-mrt-bmp">
-          Storing BMP messages in MRT Format
-        </xref>, it comes with some drawbacks like extra verbosity and increased
-        correlation effort at a BMP exporter,
-        where resources may be limited.
+        There is no mechanism in BMP to facilitate the synchronisation of either
+        the session state or the RIB contents mid-stream. 
+        <xref target="I-D.ietf-grow-bmp-tlv">
+          Stateless Parsing TLVs
+        </xref>
+        could provide the required parsing information, but there is no
+        guarantee these are present and even if they are, they do not cover
+        for all the missing session information.
       </t>
       <t>
-      Similar to how the necessary information carried in the BGP Open
-      messages is sent from the exporter to the station only in the
-      beginning of a BMP session (in forms of Peer Up Notifications), the
-      contents of the RIBs is also only sent at the beginning (in forms of
-      Route Monitoring messages). In other words, to make correct and complete
-      sense of offline BMP data, both current state (RIB contents) and session
-      details (BGP Open Capabilities) to parse future state changes are
-      required.
-    </t>
-      <t>
-      This document introduces Snapshots, enabling synchronisation of both
-      BGP session information and RIB contents anywhere in a BMP session.
-      A Snapshot is not one single message, but a collection of messages, all
-      containing a Snapshot Id TLV (introduced in this document) carrying the
-      same Snapshot Id. The session state and RIB contents are carried in Peer
-      Up Notification messages and Route Monitoring messages, respectively,
-      exactly like the initial synchronisation upon establishment of a new BMP
-      session.
-      In addition to the Peer Up Notification and Route Monitoring messages, two
-      State Snapshot messages (introduced in this document) are also included in
-      a Snapshot: one preceded all the other messages, signalling the start of
-      the Snapshot and optionally containing TLVs carrying metadata about the
-      Snapshot. And one State Snapshot messages at the very end, signalling the
-      end of the Snapshot, again optionally containing TLVs carrying metadata.
-      These TLVs are described in <xref target="meta-data-tlvs"/>.
-    </t>
+        This document introduces Snapshots, enabling synchronisation of both
+        BGP session information and RIB contents anywhere in a BMP session.
+        A Snapshot is not one single message, but a collection of messages, all
+        containing a Snapshot Id TLV (introduced in this document) carrying the
+        same Snapshot Id. The session state and RIB contents are carried in Peer
+        Up Notification messages and Route Monitoring messages, respectively,
+        exactly like the initial synchronisation upon establishment of a new BMP
+        session.
+        In addition to the Peer Up Notification and Route Monitoring messages,
+        two State Snapshot messages (introduced in this document) are included
+        in a Snapshot. One preceding all the other messages, signalling the
+        start of the Snapshot and optionally containing TLVs carrying metadata
+        about the Snapshot. And one State Snapshot messages at the very end,
+        signalling the end of the Snapshot, again optionally containing TLVs
+        carrying metadata. These TLVs are described in
+        <xref target="meta-data-tlvs"/>.
+      </t>
     <section title="Exporter vs Station">
     <t>
       The new concepts described in this document are not restricted to
