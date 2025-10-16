@@ -302,7 +302,7 @@
             present and SHOULD be the first of the TLVs. All additional TLVs
             listed in <xref target="meta-data-tlvs"/> are optional.
 
-            <figure anchor="snapshot-message" align="center">
+            <figure anchor="snapshot-message-wireformat" align="center">
               <name>
                 The Snapshot Message wireformat, including the BMP Common
                 Header and the Snapshot Id TLV.
