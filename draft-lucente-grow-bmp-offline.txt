@@ -2,61 +2,28 @@
 
 
 
-Global Routing Operations                                     P. Lucente
-Internet-Draft                                                C. Cardona
-Updates: 7854 (if approved)                                    C. Petrie
-Intended status: Standards Track                                     NTT
-Expires: 12 April 2026                                       L. Hendriks
-                                                              NLnet Labs
-                                                          9 October 2025
+Global Routing Operations                                    L. Hendriks
+Internet-Draft                                                NLnet Labs
+Updates: 7854 (if approved)                                   P. Lucente
+Intended status: Standards Track                              C. Cardona
+Expires: 19 April 2026                                         C. Petrie
+                                                                     NTT
+                                                         16 October 2025
 
 
-                          BMP State Snapshots
-                   draft-lucente-grow-bmp-offline-01
+                             BMP Snapshots
+                   draft-lucente-grow-bmp-offline-02
 
 Abstract
 
    BMP (BGP Monitoring Protocol) is perfectly suited for real-time
    consumption but less ideal in stream processing and off-wire
-   historical scenarios.  The main issue is that the ability to
-   correctly parse BGP Update PDUs, carried in BMP Route Monitoring
-   messages, depends on the BGP Capabilities exchanged during the
-   establishment of the BGP session between the peers via BGP Open PDUs.
-   The BGP Open PDUs, carried in BMP Peer Up Notification messages, are
-   exported at the establishment of the BMP session.  Similar to BGP,
-   BMP sessions are typically long-lived, so the crucial information to
-   correctly parse subsequent messages of such sessions was possibly
-   sent a relatively long time ago (days, weeks, months).
-
-   In addition to that required session state, the state of monitored
-   RIBs is also only exported at the start of the BMP session.
-   Afterwards, only deltas to that state are emitted, in forms of BMP
-   Route Monitoring messages.  In order to construct a complete and
-   correct view of the network, one can not rely on those deltas alone.
-   While constructing the state purely on deltas might, eventually, get
-   close to the 'actual' state of the network, there is no control over
-   how long one is working with an incorrect state, nor is there any
-   guaruantee that it ever will be correct.
-
-   This document introduces the concept of Snapshots.  It defines a new
-   optional BMP message type, called State Snapshot, and a new TLV,
-   called Snapshot Id.  A Snapshot is similar to the initial
-   synchronisation performed upon establishment of the BMP session: all
-   BGP session information is exported in Peer Up Notification messages,
-   and all RIB contents are exported in Route Monitoring messages.  All
-   the messages carry the new Snapshot Id TLV, containing an ID uniquely
-   identifying the snapshot these messages belong to.  The messages are
-   preceded by a State Snapshot message carrying the same Snapshot Id
-   TLV, as well as meta-data describing the Snapshot.
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 1]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
+   historical scenarios.  The issue is that the necessary information to
+   produce a complete view and enabling correct processing of all
+   messages in the stream, is only sent out at the beginning of the BMP
+   session.  This document introduces the concept of BMP Snapshots,
+   enabling BMP stations to synchronize mid-stream, and, providing the
+   basis for self-contained, time-binned archiving of BMP data.
 
 Status of This Memo
 
@@ -73,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 April 2026.
+   This Internet-Draft will expire on 19 April 2026.
 
 Copyright Notice
 
@@ -83,6 +50,14 @@ Copyright Notice
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
    license-info) in effect on the date of publication of this document.
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 1]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    Please review these documents carefully, as they describe your rights
    and restrictions with respect to this document.  Code Components
    extracted from this document must include Revised BSD License text as
@@ -94,90 +69,106 @@ Table of Contents
    1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
      1.1.  Exporter vs Station . . . . . . . . . . . . . . . . . . .   4
        1.1.1.  Considerations regarding alternative approaches . . .   4
-     1.2.  Flexibility and extensibility . . . . . . . . . . . . . .   6
-     1.3.  Backwards (in)compatibility . . . . . . . . . . . . . . .   6
-       1.3.1.  Possible workaround . . . . . . . . . . . . . . . . .   6
-   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   7
-     2.1.  Terms in this document  . . . . . . . . . . . . . . . . .   7
-   3.  State Snapshot message  . . . . . . . . . . . . . . . . . . .   8
-     3.1.  Wireformat  . . . . . . . . . . . . . . . . . . . . . . .   8
-     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   9
-     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   9
-   4.  Snapshot Information TLVs . . . . . . . . . . . . . . . . . .   9
-     4.1.  Snapshot Id TLV . . . . . . . . . . . . . . . . . . . . .   9
-     4.2.  Snapshot Error TLV  . . . . . . . . . . . . . . . . . . .  10
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 2]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .  10
-   5.  Third party off-wire encoding formats . . . . . . . . . . . .  11
-   6.  Operational Considerations  . . . . . . . . . . . . . . . . .  11
-     6.1.  End-of-snapshot with an Error TLV . . . . . . . . . . . .  11
-     6.2.  Snapshot Id scheme  . . . . . . . . . . . . . . . . . . .  11
-       6.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  12
-       6.2.2.  Increasing identifiers  . . . . . . . . . . . . . . .  12
-     6.3.  Requesting/triggering snapshots . . . . . . . . . . . . .  12
-       6.3.1.  Timer-based . . . . . . . . . . . . . . . . . . . . .  12
-       6.3.2.  Manual triggers . . . . . . . . . . . . . . . . . . .  13
-       6.3.3.  Out-of-band request via other protocols . . . . . . .  13
-   7.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  13
-     7.1.  No EoRs in Snapshots  . . . . . . . . . . . . . . . . . .  13
-   8.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
-   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .  14
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  15
+     1.2.  Flexibility and extensibility . . . . . . . . . . . . . .   5
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     2.1.  Terms in this document  . . . . . . . . . . . . . . . . .   6
+   3.  Snapshot Message  . . . . . . . . . . . . . . . . . . . . . .   6
+     3.1.  Wireformat  . . . . . . . . . . . . . . . . . . . . . . .   6
+     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   7
+     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   7
+   4.  Snapshot Information TLVs . . . . . . . . . . . . . . . . . .   8
+     4.1.  Snapshot Id TLV . . . . . . . . . . . . . . . . . . . . .   8
+     4.2.  Snapshot Error TLV  . . . . . . . . . . . . . . . . . . .   8
+     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .   8
+   5.  Backwards (in)compatibility . . . . . . . . . . . . . . . . .   9
+     5.1.  Possible workaround . . . . . . . . . . . . . . . . . . .  10
+   6.  Third party off-wire encoding formats . . . . . . . . . . . .  11
+   7.  Operational Considerations  . . . . . . . . . . . . . . . . .  11
+     7.1.  End-of-snapshot with an Error TLV . . . . . . . . . . . .  11
+     7.2.  Snapshot Id scheme  . . . . . . . . . . . . . . . . . . .  11
+       7.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  11
+       7.2.2.  Increasing identifiers  . . . . . . . . . . . . . . .  12
+     7.3.  Requesting/triggering snapshots . . . . . . . . . . . . .  12
+       7.3.1.  Timer-based . . . . . . . . . . . . . . . . . . . . .  12
+       7.3.2.  Manual triggers . . . . . . . . . . . . . . . . . . .  12
+       7.3.3.  Out-of-band request via other protocols . . . . . . .  13
+   8.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     8.1.  No EoRs in Snapshots  . . . . . . . . . . . . . . . . . .  13
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  14
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  15
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  15
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
 
+
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 2]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
 1.  Introduction
 
-   Correctly parsing BGP Update PDUs included in BMP messages (ie.
-   Route Monitoring) does require a stateful approach by keeping track
-   of capabilities exchanged in the BGP Open PDUs as reported by BMP
-   Peer Up Notification messages.
+   BMP (BGP Monitoring Protocol) is perfectly suited for real-time
+   consumption but less ideal in stream processing and off-wire
+   historical scenarios.  The issue is that the necessary information to
+   produce a complete view and enabling correct processing of all
+   messages in the stream, is only sent out at the beginning of the BMP
+   session.  This document introduces the concept of BMP Snapshots,
+   enabling BMP stations to synchronize mid-stream, and, providing the
+   basis for self-contained, time-binned archiving of BMP data.
 
-   Peer Up Notification messages are sent only during the initial
-   synchronisation at the start of the BMP session, or, whenever a BGP
-   session is established on the monitored router.  The necessary
-   information in the BGP Open (and Peer Up Notification) messages may
-   thus have been received long before its needed to parse incoming BGP
-   Updates in Route Monitoring messages.  This inevitable stateful
-   approach might be challenging in certain scenarios, such as consuming
-   archived BMP messages or deployments where BMP Stations or processing
-   nodes not necessarily see the (complete) start of every BMP stream.
+   At the very start of a BMP session, two types of information are sent
+   from exporter to monitor.  Firstly, session state, describing all
+   established BGP sessions on the monitored router.  Secondly, the RIB
+   contents, i.e. all the routes the monitored router has learned thus
+   far.  Missing either of these cause different problems: the session
+   state contains information (Capabilities in the BGP Open messages,
+   encapsulated in the Peer Up Notification) crucial to correctly parse
+   messages in the stream, and the RIB contents represent the starting
+   state to apply deltas (BGP Updates encapsulated in Route Monitoring
+   messages) in the BMP stream to.  In order to construct a complete and
+   correct view of the network, one can not rely on those deltas alone.
+   While constructing the state purely on deltas might, eventually, get
+   close to the 'actual' state of the network, there is no control over
+   how long one is working with an incorrect state, nor is there any
+   guarantee that it ever will be correct.
 
-   TLV support for BMP Route Monitoring and Peer Down Messages
-   [I-D.ietf-grow-bmp-tlv] defines a Stateless Parsing TLV aimed at
-   including relevant capabilities that have an impact in BGP Update
-   message parsing as part of optional informational TLV in Route
-   Monitoring messages.  While the method is valid, in fact it does
-   allow with minor effort to encapsulate BMP in MRT format for offline
-   consumption as documented by Storing BMP messages in MRT Format
-   [I-D.petrie-grow-mrt-bmp], it comes with some drawbacks like extra
-   verbosity and increased correlation effort at a BMP exporter, where
-   resources may be limited.
+   There is no mechanism in BMP to facilitate the synchronisation of
+   either the session state or the RIB contents mid-stream.  Stateless
+   Parsing TLVs [I-D.ietf-grow-bmp-tlv] could provide the required
+   parsing information, but there is no guarantee these are present and
+   even if they are, they do not cover for all the missing session
+   information.
 
 
 
-Lucente, et al.           Expires 12 April 2026                 [Page 3]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 3]
 
-Internet-Draft             BMP State Snapshots              October 2025
+Internet-Draft                BMP Snapshots                 October 2025
 
-
-   Similar to how the necessary information carried in the BGP Open
-   messages is sent from the exporter to the station only in the
-   beginning of a BMP session (in forms of Peer Up Notifications), the
-   contents of the RIBs is also only sent at the beginning (in forms of
-   Route Monitoring messages).  In other words, to make correct and
-   complete sense of offline BMP data, both current state (RIB contents)
-   and session details (BGP Open Capabilities) to parse future state
-   changes are required.
 
    This document introduces Snapshots, enabling synchronisation of both
    BGP session information and RIB contents anywhere in a BMP session.
@@ -187,13 +178,13 @@ Internet-Draft             BMP State Snapshots              October 2025
    are carried in Peer Up Notification messages and Route Monitoring
    messages, respectively, exactly like the initial synchronisation upon
    establishment of a new BMP session.  In addition to the Peer Up
-   Notification and Route Monitoring messages, two State Snapshot
-   messages (introduced in this document) are also included in a
-   Snapshot: one preceded all the other messages, signalling the start
-   of the Snapshot and optionally containing TLVs carrying metadata
-   about the Snapshot.  And one State Snapshot messages at the very end,
-   signalling the end of the Snapshot, again optionally containing TLVs
-   carrying metadata.  These TLVs are described in Section 4.3.
+   Notification and Route Monitoring messages, two Snapshot Messages
+   (introduced in this document) are included in a Snapshot.  One
+   preceding all the other messages, signalling the start of the
+   Snapshot and optionally containing TLVs carrying metadata about the
+   Snapshot.  And one Snapshot Message at the very end, signalling the
+   end of the Snapshot, again optionally containing TLVs carrying
+   metadata.  These TLVs are described in Section 4.3.
 
 1.1.  Exporter vs Station
 
@@ -218,69 +209,56 @@ Internet-Draft             BMP State Snapshots              October 2025
    // This section is included as a record of discussion, and is to be
    // removed/reduced at a later stage.
 
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 4]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
    Emitting all contents of a RIB is very similar, if not identical, to
    the process of a Route Refresh [RFC2918].  For routers exporting BMP
    streams, the assumption is that they support Route Refresh.  The
    authors evaluated if mimicking a Route Refresh could provide
-   functionality similar to State Snapshots, but at lower
-   (computational) cost.  While a full overview of key features/
-   requirements is listed in Table 1, it was concluded that a Route
-   Refresh lacks (too) many of the features of a Snapshot.  Moreover, it
-   would still be considered too expensive to perform on any regular
-   basis on routers.
-
-      +---------------------------+-----------------+---------------+
-      |                           | State Snapshots | Route Refresh |
-      +---------------------------+-----------------+---------------+
-      | Feature/quality:                                            |
-      +---------------------------+-----------------+---------------+
-      | In-protocol               | y               | y             |
-      +---------------------------+-----------------+---------------+
-      | Signal begin/end          | y               | y             |
-      +---------------------------+-----------------+---------------+
-      | RIB contents              | y               | y             |
-      +---------------------------+-----------------+---------------+
-      | Session info              | y               | n             |
-      +---------------------------+-----------------+---------------+
-      | Distinguish sync vs live  | y               | n             |
-      +---------------------------+-----------------+---------------+
-      | Distinguish between syncs | y               | n             |
-      +---------------------------+-----------------+---------------+
-      | Per address family        | y               | y             |
-      +---------------------------+-----------------+---------------+
-      | Additional metadata       | y               | n             |
-      +---------------------------+-----------------+---------------+
-      | Extensible                | y               | n             |
-      +---------------------------+-----------------+---------------+
-      | Expensive                 | y               | Less          |
-      +---------------------------+-----------------+---------------+
-      | Protocol requirement:                                       |
-      +---------------------------+-----------------+---------------+
-      | New mesage type or TLV    | both            | either        |
-      +---------------------------+-----------------+---------------+
-
-        Table 1: Overview of feature/requirement comparison between
-           the approach described in this document and a approach
-                      based on Route Refresh messages
+   functionality similar to Snapshots, but at lower (computational)
+   cost.  While a full overview of key features/requirements is listed
+   in Table 1, it was concluded that a Route Refresh lacks (too) many of
+   the features of a Snapshot.  Moreover, it would still be considered
+   too expensive to perform on any regular basis on routers.
 
 
 
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 5]
+Hendriks, et al.          Expires 19 April 2026                 [Page 4]
 
-Internet-Draft             BMP State Snapshots              October 2025
+Internet-Draft                BMP Snapshots                 October 2025
 
+
+         +---------------------------+-----------+---------------+
+         |                           | Snapshots | Route Refresh |
+         +---------------------------+-----------+---------------+
+         | Feature/quality:                                      |
+         +---------------------------+-----------+---------------+
+         | In-protocol               | y         | y             |
+         +---------------------------+-----------+---------------+
+         | Signal begin/end          | y         | y             |
+         +---------------------------+-----------+---------------+
+         | RIB contents              | y         | y             |
+         +---------------------------+-----------+---------------+
+         | Session info              | y         | n             |
+         +---------------------------+-----------+---------------+
+         | Distinguish sync vs live  | y         | n             |
+         +---------------------------+-----------+---------------+
+         | Distinguish between syncs | y         | n             |
+         +---------------------------+-----------+---------------+
+         | Per address family        | y         | y             |
+         +---------------------------+-----------+---------------+
+         | Additional metadata       | y         | n             |
+         +---------------------------+-----------+---------------+
+         | Extensible                | y         | n             |
+         +---------------------------+-----------+---------------+
+         | Expensive                 | y         | Less          |
+         +---------------------------+-----------+---------------+
+         | Protocol requirement:                                 |
+         +---------------------------+-----------+---------------+
+         | New mesage type or TLV    | both      | either        |
+         +---------------------------+-----------+---------------+
+
+            Table 1: Overview of feature/requirement comparison
+           between the approach described in this document and a
+                  approach based on Route Refresh messages
 
 1.2.  Flexibility and extensibility
 
@@ -292,74 +270,17 @@ Internet-Draft             BMP State Snapshots              October 2025
    messages.  No existing message types have to be adapted to support
    Snapshots.
 
-1.3.  Backwards (in)compatibility
-
-   If an implementation lacking support for Snapshots receives a
-   Snapshot, it should ignore the State Snapshot messages and the
-   Snapshot Id TLVs, as these are all optional.  However, this reduces a
-   Snapshot to a bunch of Peer Up Notification and Route Monitoring
-   messages indistinguishable from 'normal' Peer Up Notification and
-   Route Monitoring messages.  This introduces the following problems:
-
-   *  Peer Up Notifications from a Snapshot will be interpreted as
-      normal Peer Up Notifications, though for a peer that was already
-      considered 'up'.  This situation is not explicitly described in
-      Section 3.3 of [RFC7854], and can be considered unexpected.  Even
-      though application of Peer Up Notifications could be considered
-      idempotent (the state after processing the message is 'this peer
-      is up' regardless of how often that message is received and
-      processed), receiving the message implicitly signals the peer was
-      down before, which is incorrect, and is possibly a source of
-      confusion.
-
-   *  Route Monitoring messages from a Snapshot interpreted as normal
-      Route Monitoring messages would not come as unexpected in the life
-      cycle of a BMP session.  Similarly to Peer Up Notification
-      messages, their application is idempotent in nature as the result
-      of processing the message is 'this route is reachable'.  Note that
-      Route Monitoring messages from a Snapshot will always be
-      announcements, not withdrawals.  However, as with Peer Up
-      Notification messages, a normal Route Monitoring message
-      implicitly signals 'this route was not reachable before', which is
-      incorrect in the case of Route Monitoring messages that were
-      actually part of a Snapshot.
-
-1.3.1.  Possible workaround
-
-   *  Partial support on the consuming side: dropping messages based on
-      Snapshot Id TLV presence
 
 
 
 
 
-Lucente, et al.           Expires 12 April 2026                 [Page 6]
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 5]
 
-Internet-Draft             BMP State Snapshots              October 2025
+Internet-Draft                BMP Snapshots                 October 2025
 
-
-      If a station implementation does not support State Snapshots, it
-      should be able to recognize Snapshot Id TLVs relatively easily.
-      With BMPv4, the BGP Update is carried in a TLV in the Route
-      Monitoring message, so any implementation will be able to process
-      TLVs to a certain extent.  It then only needs to be aware of the
-      type code of the Snapshot Id TLV type: as all messages in a
-      Snapshot will carry a TLV of this type, the implementation can
-      simply skip/drop those messages, and preclude any of the problems
-      described above.
-
-   *  In-protocol: Introducing a flag in the Per Peer Header
-
-      Setting a flag for messages that are part of a Snapshot will allow
-      consumers to distinguish between such messages and 'normal' Peer
-      Up Notification and Route Monitoring messages.  An additional
-      benefit of a flag would be the enabling of optimisations on the
-      receiving end, where messages pertaining to a Snapshot can now
-      easily be treated differently (specific queue or thread) or
-      discarded in case the receiver has not interest in Snapshots.
-
-      Note that this approach also requires (minimal) changes to the
-      receiving side, namely the recognition of such a flag.
 
 2.  Terminology
 
@@ -385,15 +306,6 @@ Internet-Draft             BMP State Snapshots              October 2025
       message/PDU itself.
 
    Snapshot Message:  A BMP message type, introduced in this document,
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 7]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
       to signal the start or end of a Snapshot.  The first and last
       message of a Snapshot are of this message type.
 
@@ -401,20 +313,30 @@ Internet-Draft             BMP State Snapshots              October 2025
       of type Snapshot Message.  For example, a Route Monitoring message
       that is part of a Snapshot is considered a Snapshot message.
 
-3.  State Snapshot message
+3.  Snapshot Message
 
    Every Snapshot contains exactly two messages of the Snapshot type:
    one preceding all the Peer Up Notifications and Route Monitoring
-   messages containing the actual data, and one Snapshot message to
+   messages containing the actual data, and one Snapshot Message to
    signal the end.  Both follow the same wireformat.
 
 3.1.  Wireformat
 
-   The State Snapshot message starts with a BMP Common Header as defined
-   in Section 4.1 of [RFC7854].  The Common Header is directly followed
-   by TLVs.  The Snapshot Id TLV defined in Section 4.1 MUST be present
-   and SHOULD be the first of the TLVs.  All additional TLVs listed in
+   The Snapshot Message starts with a BMP Common Header as defined in
+   Section 4.1 of [RFC7854].  The Common Header is directly followed by
+   TLVs.  The Snapshot Id TLV defined in Section 4.1 MUST be present and
+   SHOULD be the first of the TLVs.  All additional TLVs listed in
    Section 4.3 are optional.
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 6]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
 
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -436,83 +358,66 @@ Internet-Draft             BMP State Snapshots              October 2025
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-      Figure 1: The State Snapshot message wireformat, including the
-                BMP Common Header and the Snapshot Id TLV.
+       Figure 1: The Snapshot Message wireformat, including the BMP
+                  Common Header and the Snapshot Id TLV.
 
-
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 8]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-   The State Snapshot message can be generated by a BMP exporter or by a
+   The Snapshot (Messages) can be generated by a BMP exporter or by a
    BMP station, as long as all required data for the Peer Up
    Notification and Route Monitoring messages pertaining to the Snapshot
-   are available.  The State Snapshot message MUST be followed by those
+   are available.  The Snapshot Message MUST be followed by those
    messages, with the Snapshot Id TLV attached to every message.
 
 3.2.  Start-of-snapshot
 
-   The Snapshot message preceding all other messages in the Snapshot
+   The Snapshot Message preceding all other messages in the Snapshot
    should contain TLVs providing useful metadata for the consumer of the
    Snapshot.  For example, the timestamp of snapshot generation, and
    information about the exporter (IP address, software version).
    Furthermore, they can describe which address families are included in
    the snapshot, and for which RIB views (e.g. Adj-RIB-In Pre-policy).
    Note that, as all meta-data TLVs are optional, a consumer of
-   Snapshots should never rely on presence of any of these TLVs.
+   snapshots should never rely on presence of any of these TLVs.
 
 3.3.  End-of-snapshot
 
    After all Peer Up Notification and Route Monitoring messages of the
    Snapshot, the end of the Snapshot is signalled by means of another
-   Snapshot message.  This Snapshot message contains the Snapshot Id TLV
+   Snapshot Message.  This Snapshot Message contains the Snapshot Id TLV
    like all other messages comprising the Snapshot.  This Snapshot
-   message can also contain meta-data TLVs, most notably the Snapshot
+   Message can also contain meta-data TLVs, most notably the Snapshot
    Error TLV.  If, for whatever reason, the sending side can not
-   complete the Snapshot, it MUST send a Snapshot message containing a
-   Snapshot Error TLVs to signal the Snapshot is incomplete and/or
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 7]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+   complete the Snapshot, it MUST send a Snapshot Message containing a
+   Snapshot Error TLV to signal the Snapshot is incomplete and/or
    incorrect.  For discussion on operational consequences, see
-   Section 6.1.
+   Section 7.1.
 
 4.  Snapshot Information TLVs
 
 4.1.  Snapshot Id TLV
 
-   The Snapshot Id TLV is the only mandatory TLV of a State Snapshot
-   message as defined in Section 3.  It is an indexed TLV (as it will be
+   The Snapshot Id TLV is the only mandatory TLV of a Snapshot Message
+   as defined in Section 3.  It is an indexed TLV (as it will be
    included in Route Monitoring messages, with index zero), structured
    as defined in Section 4 of [I-D.ietf-grow-bmp-tlv], with a fixed
    value length of 16 bytes.  This allows the use of UUID identifiers,
    or provides sufficient space for alternative schemes.  Different
-   approaches for schemes are discussed in Section 6.
-
-
-
-
-
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                 [Page 9]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
+   approaches for schemes are discussed in Section 7.
 
 4.2.  Snapshot Error TLV
 
    The Snapshot Error TLV is used to signal that a sender can not
    complete a currently in-flight Snapshot, and MUST be included in the
-   End-of-snapshot Snapshot message the sender sends to signal the end
+   End-of-snapshot Snapshot Message the sender sends to signal the end
    of the (in this case incorrect/incomplete) Snapshot.  Sending out the
-   End-of-snapshot Snapshot message is crucial, as failing to do so
+   End-of-snapshot Snapshot Message is crucial, as failing to do so
    leaves the consuming end in a state where it expects more messages
    pertaining to the Snapshot.  The value in a Snapshot Error TLV is a
    UTF-8 string of arbitrary length, describing the failure reason.
@@ -523,7 +428,7 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 4.3.  Optional meta-data TLVs
 
-   The Peer Snapshot message SHOULD carry TLVs providing additional
+   The Snapshot Message SHOULD carry TLVs providing additional
    information on the BMP session being summarized.  These Snapshot
    Information TLVs describe the BMP exporter and station involved, and
    the date and time the snapshot was generated.  By embedding these
@@ -531,56 +436,133 @@ Internet-Draft             BMP State Snapshots              October 2025
    rely on the filename or other external data to get these types of
    information.  All TLVs are non-indexed.
 
-   *  Type = TBD3: Datetime of snapshot
+   *  Type = TBD4: Datetime of snapshot
 
          Length: 8 bytes
 
          Value: 64bit UNIX epoch, in seconds
 
-   *  Type = TBD4: Exporter IP address
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 8]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+   *  Type = TBD5: Exporter IP address
 
          Length: 16 bytes
 
          Value: IPv6 or IPv4-mapped IPv6 address
 
-   *  Type = TBD5: Exporter sysName
+   *  Type = TBD6: Exporter sysName
 
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-   *  Type = TBD6: Exporter sysDesc
+   *  Type = TBD7: Exporter sysDesc
 
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-
-
-Lucente, et al.           Expires 12 April 2026                [Page 10]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-   *  Type = TBD7: Station IP address
+   *  Type = TBD8: Station IP address
 
          Length: variable, non-zero, describing the number of bytes
 
          Value: IPv6 or IPv4-mapped IPv6 address
 
-   *  Type = TBD8: Station sysName
+   *  Type = TBD9: Station sysName
 
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-   *  Type = TBD9: Station sysDesc
+   *  Type = TBD10: Station sysDesc
 
          Length: variable, non-zero, describing the number of bytes
 
          Value: UTF-8 string
 
-5.  Third party off-wire encoding formats
+5.  Backwards (in)compatibility
+
+   If an implementation lacking support for Snapshots receives a
+   Snapshot, it should ignore the Snapshot Messages and the Snapshot Id
+   TLVs, as these are all optional.  However, this reduces a Snapshot to
+   a bunch of Peer Up Notification and Route Monitoring messages
+   indistinguishable from 'normal' Peer Up Notification and Route
+   Monitoring messages.  This introduces the following problems:
+
+   *  Peer Up Notifications from a Snapshot will be interpreted as
+      normal Peer Up Notifications, though for a peer that was already
+      considered 'up'.  This situation is not explicitly described in
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 9]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+      Section 3.3 of [RFC7854], and can be considered unexpected.  Even
+      though application of Peer Up Notifications could be considered
+      idempotent (the state after processing the message is 'this peer
+      is up' regardless of how often that message is received and
+      processed), receiving the message implicitly signals the peer was
+      down before, which is incorrect, and is possibly a source of
+      confusion.
+
+   *  Route Monitoring messages from a Snapshot interpreted as normal
+      Route Monitoring messages would not come as unexpected in the life
+      cycle of a BMP session.  Similarly to Peer Up Notification
+      messages, their application is idempotent in nature as the result
+      of processing the message is 'this route is reachable'.  Note that
+      Route Monitoring messages from a Snapshot will always be
+      announcements, not withdrawals.  However, as with Peer Up
+      Notification messages, a normal Route Monitoring message
+      implicitly signals 'this route was not reachable before' or
+      'attributes for this route have changed', which is incorrect in
+      the case of Route Monitoring messages that were actually part of a
+      Snapshot.
+
+5.1.  Possible workaround
+
+   *  Partial support on the consuming side: dropping messages based on
+      Snapshot Id TLV presence
+
+      If a station implementation does not support Snapshots, it should
+      be able to recognize Snapshot Id TLVs relatively easily.  With
+      BMPv4, the BGP Update is carried in a TLV in the Route Monitoring
+      message, so any implementation will be able to process TLVs to a
+      certain extent.  It then only needs to be aware of the type code
+      of the Snapshot Id TLV type: as all messages in a Snapshot will
+      carry a TLV of this type, the implementation can simply skip/drop
+      those messages, and preclude any of the problems described above.
+
+   *  In-protocol: Introducing a flag in the Per Peer Header
+
+      Setting a flag for messages that are part of a Snapshot will allow
+      consumers to distinguish between such messages and 'normal' Peer
+      Up Notification and Route Monitoring messages.  An additional
+      benefit of a flag would be the enabling of optimisations on the
+      receiving end, where messages pertaining to a Snapshot can now
+      easily be treated differently (specific queue or thread) or
+      discarded in case the receiver has not interest in Snapshots.
+
+      Note that this approach also requires (minimal) changes to the
+      receiving side, namely the recognition of such a flag.
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 10]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+6.  Third party off-wire encoding formats
 
    While this document does define a way to facilitate stream
    processing, replay and, more in general, consumption of raw BMP data
@@ -592,12 +574,22 @@ Internet-Draft             BMP State Snapshots              October 2025
    As a result of that, this document does not recommend a preferred way
    to stream process or store BMP data offline.
 
-6.  Operational Considerations
+7.  Operational Considerations
 
-6.1.  End-of-snapshot with an Error TLV
+7.1.  End-of-snapshot with an Error TLV
 
+   Receiving a Snapshot Message containing a Snapshot Error TLV signals
+   the Snapshot is incomplete or incorrect.  Possible actions at this
+   point depend on the situation, on who is consuming the Snapshot, and
+   to which end.  In an online scenario where the Snapshot was
+   explicitly requested (see also Section 7.3), one could opt for a
+   retry by requesting another Snapshot.  If one encounters an Error TLV
+   in a Snapshot Message part of archived, offline data, there is no way
+   to request a new Snapshot.  While such a Snapshot could be used to
+   infer some things, it can not be used to rebuild a complete view of
+   the network.
 
-6.2.  Snapshot Id scheme
+7.2.  Snapshot Id scheme
 
    The generation and form of the Snapshot Ids introduced in this
    document is left to implementations.  This document does not enforce
@@ -606,19 +598,7 @@ Internet-Draft             BMP State Snapshots              October 2025
    only one Id scheme, but ideally support multiple schemes via local
    configuration.
 
-
-
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                [Page 11]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-6.2.1.  Global uniqueness
+7.2.1.  Global uniqueness
 
    In deployments where information is received from multiple BMP
    vantage points, unique Snapshot Ids might prove handy or even crucial
@@ -628,7 +608,17 @@ Internet-Draft             BMP State Snapshots              October 2025
    version 4, they all can send out Snapshots without possibly using an
    identical Snapshot Id generated by another exporter.
 
-6.2.2.  Increasing identifiers
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 11]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+7.2.2.  Increasing identifiers
 
    Generating (linearly) increasing identifiers enable the BMP station
    to order Snapshots, and, to spot any missing Snapshots.  Furthermore,
@@ -639,7 +629,7 @@ Internet-Draft             BMP State Snapshots              October 2025
    the Timestamp TLV (TBD3), and the number of sent Snapshots could be
    included in the Stats Report message (Section 4.8 of [RFC7854]).
 
-6.3.  Requesting/triggering snapshots
+7.3.  Requesting/triggering snapshots
 
    BMP being a unidirectional protocol from exporter to station means
    there is no way for a station to request or trigger the creation of a
@@ -648,7 +638,7 @@ Internet-Draft             BMP State Snapshots              October 2025
    implementation of Snapshots requires at least one way to trigger
    their creation, some possible approaches are briefly discussed.
 
-6.3.1.  Timer-based
+7.3.1.  Timer-based
 
    An exporter could be configured to generate and emit Snapshots on a
    regular interval, without a request from the station.  Depending on
@@ -662,19 +652,7 @@ Internet-Draft             BMP State Snapshots              October 2025
    generating Snapshots and writing them to persistent storage, e.g.
    doing time-binned historical archiving.
 
-
-
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                [Page 12]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-6.3.2.  Manual triggers
+7.3.2.  Manual triggers
 
    In situations where a Snapshot is only used to recover from a broken
    state at a station (either directly connected to the exporter or a
@@ -686,7 +664,17 @@ Internet-Draft             BMP State Snapshots              October 2025
    the BMP stream might be a simpler and perhaps even cheaper
    alternative.
 
-6.3.3.  Out-of-band request via other protocols
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 12]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+7.3.3.  Out-of-band request via other protocols
 
    For more complex setups where e.g. the BMP messages continue on a
    messages bus, the generation and sending of Snapshots could be
@@ -697,9 +685,9 @@ Internet-Draft             BMP State Snapshots              October 2025
    this document allows for such subsets, but such an out-of-band
    protocol and its parameters are out of scope.
 
-7.  Discussion
+8.  Discussion
 
-7.1.  No EoRs in Snapshots
+8.1.  No EoRs in Snapshots
 
    This document describes the logical concept of a Snapshot as a
    collection of Peer Up Notifications and Route Monitoring messages,
@@ -719,39 +707,38 @@ Internet-Draft             BMP State Snapshots              October 2025
    interpretation.  Including EoRs in a Snapshot perhaps only adds to
    the confusion, and therefore leaving them out could be preferable.
 
-
-
-
-
-
-
-Lucente, et al.           Expires 12 April 2026                [Page 13]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
-8.  Security Considerations
+9.  Security Considerations
 
    It is not believed that this document adds any additional security
    considerations.
 
-9.  IANA Considerations
+10.  IANA Considerations
 
-   IANA is asked to allocate a new Peer Snapshot message type in the BMP
-   Message Types registry with value TBD1.  IANA is also asked to to
-   create a registry within the BMP group, named "BMP Peer Snapshot
-   Message TLVs".
+   IANA is asked to allocate a new Snapshot Message type in the BMP
+   Message Types registry with value TBD1.  IANA is also asked to create
+   a registry within the BMP group, named "BMP Snapshot Message TLVs".
 
-   Registration procedures for this registry are:
+   Registration procedures for this new registry are:
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 13]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
+   // Note that these have been adapted to the proposed ranges as
+   // described in [I-D.ietf-grow-bmp-tlv] version -19.
 
                 +=============+==========================+
                 |    Range    | Registration Procedures  |
                 +=============+==========================+
-                |   0-32767   |     Standards Action     |
+                |   0-16383   |     Standards Action     |
                 +-------------+--------------------------+
-                | 32768-65530 | First Come, First Served |
-                +-------------+--------------------------+
-                | 65531-65534 |       Experimental       |
+                | 16384-32767 | First Come, First Served |
                 +-------------+--------------------------+
                 |    65535    |         Reserved         |
                 +-------------+--------------------------+
@@ -760,17 +747,22 @@ Internet-Draft             BMP State Snapshots              October 2025
 
    Initial values for this registry are:
 
-                  +======+=============+===============+
-                  | Type | Description |   Reference   |
-                  +======+=============+===============+
-                  | TBD2 |     Peer    | this document |
-                  +------+-------------+---------------+
 
-                                 Table 3
+   // Update this table once we have converged on Section 4.3.
 
-10.  References
+                 +======+================+===============+
+                 | Type |  Description   |   Reference   |
+                 +======+================+===============+
+                 | TBD2 |  Snapshot Id   | this document |
+                 +------+----------------+---------------+
+                 | TBD3 | Snapshot Error | this document |
+                 +------+----------------+---------------+
 
-10.1.  Normative References
+                                  Table 3
+
+11.  References
+
+11.1.  Normative References
 
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
@@ -779,13 +771,6 @@ Internet-Draft             BMP State Snapshots              October 2025
               2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
               grow-bmp-rel-04>.
 
-
-
-Lucente, et al.           Expires 12 April 2026                [Page 14]
-
-Internet-Draft             BMP State Snapshots              October 2025
-
-
    [I-D.ietf-grow-bmp-tlv]
               Lucente, P. and Y. Gu, "BMP v4: TLV Support for BGP
               Monitoring Protocol (BMP) Route Monitoring and Peer Down
@@ -793,6 +778,13 @@ Internet-Draft             BMP State Snapshots              October 2025
               grow-bmp-tlv-18, 3 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
               bmp-tlv-18>.
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 14]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
 
    [I-D.petrie-grow-mrt-bmp]
               Petrie, C., "Storing BMP messages in MRT Format", Work in
@@ -819,7 +811,7 @@ Internet-Draft             BMP State Snapshots              October 2025
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [RFC2918]  Chen, E., "Route Refresh Capability for BGP-4", RFC 2918,
               DOI 10.17487/RFC2918, September 2000,
@@ -831,15 +823,23 @@ Acknowledgements
 
 Authors' Addresses
 
+   Luuk Hendriks
+   NLnet Labs
+   Science Park 400
+   1098 XH Amsterdam
+   Netherlands
+   Email: luuk@nlnetlabs.nl
 
 
 
 
 
 
-Lucente, et al.           Expires 12 April 2026                [Page 15]
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 15]
 
-Internet-Draft             BMP State Snapshots              October 2025
+Internet-Draft                BMP Snapshots                 October 2025
 
 
    Paolo Lucente
@@ -866,12 +866,6 @@ Internet-Draft             BMP State Snapshots              October 2025
    Email: colin@ntt.net
 
 
-   Luuk Hendriks
-   NLnet Labs
-   Science Park 400
-   1098 XH Amsterdam
-   Netherlands
-   Email: luuk@nlnetlabs.nl
 
 
 
@@ -893,4 +887,10 @@ Internet-Draft             BMP State Snapshots              October 2025
 
 
 
-Lucente, et al.           Expires 12 April 2026                [Page 16]
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 16]
