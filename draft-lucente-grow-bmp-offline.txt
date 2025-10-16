@@ -74,33 +74,33 @@ Table of Contents
      2.1.  Terms in this document  . . . . . . . . . . . . . . . . .   6
    3.  Snapshot Message  . . . . . . . . . . . . . . . . . . . . . .   6
      3.1.  Wireformat  . . . . . . . . . . . . . . . . . . . . . . .   6
-     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   7
-     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   7
+     3.2.  Start-of-snapshot . . . . . . . . . . . . . . . . . . . .   8
+     3.3.  End-of-snapshot . . . . . . . . . . . . . . . . . . . . .   8
    4.  Snapshot Information TLVs . . . . . . . . . . . . . . . . . .   8
      4.1.  Snapshot Id TLV . . . . . . . . . . . . . . . . . . . . .   8
      4.2.  Snapshot Error TLV  . . . . . . . . . . . . . . . . . . .   8
-     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .   8
-   5.  Backwards (in)compatibility . . . . . . . . . . . . . . . . .   9
+     4.3.  Optional meta-data TLVs . . . . . . . . . . . . . . . . .   9
+   5.  Backwards (in)compatibility . . . . . . . . . . . . . . . . .  10
      5.1.  Possible workaround . . . . . . . . . . . . . . . . . . .  10
    6.  Third party off-wire encoding formats . . . . . . . . . . . .  11
    7.  Operational Considerations  . . . . . . . . . . . . . . . . .  11
      7.1.  End-of-snapshot with an Error TLV . . . . . . . . . . . .  11
-     7.2.  Snapshot Id scheme  . . . . . . . . . . . . . . . . . . .  11
-       7.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  11
+     7.2.  Snapshot Id scheme  . . . . . . . . . . . . . . . . . . .  12
+       7.2.1.  Global uniqueness . . . . . . . . . . . . . . . . . .  12
        7.2.2.  Increasing identifiers  . . . . . . . . . . . . . . .  12
      7.3.  Requesting/triggering snapshots . . . . . . . . . . . . .  12
        7.3.1.  Timer-based . . . . . . . . . . . . . . . . . . . . .  12
-       7.3.2.  Manual triggers . . . . . . . . . . . . . . . . . . .  12
+       7.3.2.  Manual triggers . . . . . . . . . . . . . . . . . . .  13
        7.3.3.  Out-of-band request via other protocols . . . . . . .  13
    8.  Discussion  . . . . . . . . . . . . . . . . . . . . . . . . .  13
      8.1.  No EoRs in Snapshots  . . . . . . . . . . . . . . . . . .  13
-   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
-   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
+   9.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
+   10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
    11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
      11.1.  Normative References . . . . . . . . . . . . . . . . . .  14
      11.2.  Informative References . . . . . . . . . . . . . . . . .  15
-   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  15
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
+   Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  16
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
 
 
 
@@ -338,34 +338,61 @@ Hendriks, et al.          Expires 19 April 2026                 [Page 6]
 Internet-Draft                BMP Snapshots                 October 2025
 
 
-        0                   1                   2                   3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-       +-+-+-+-+-+-+-+-+
-       |   Version=4   |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                        Message Length >= 6 + 6 + 16           |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       | Msg Type=TBD1 |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |        TLV Type = TBD2        |         Length = 16           |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |        Index = 0x0000         |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                                                               |
-       |                    Snapshot Id (16 octets)                    |
-       |                                                               |
-       |                                                               |
-       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      0                   1                   2                   3
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+     +---------------+
+     |   Version=4   |
+     +---------------+-----------------------------------------------+
+     |                        Message Length >= 6 + 6 + 16           |
+     +---------------+-----------------------------------------------+
+     | Msg Type=TBD1 |
+     +---------------+---------------+-------------------------------+
+     |        TLV Type = TBD2        |         Length = 16           |
+     +-------------------------------+-------------------------------+
+     |        Index = 0x0000         |
+     +-------------------------------+-------------------------------+
+     |                                                               |
+     |                    Snapshot Id (16 octets)                    |
+     |                                                               |
+     |                                                               |
+     +---------------------------------------------------------------+
 
-
-       Figure 1: The Snapshot Message wireformat, including the BMP
-                  Common Header and the Snapshot Id TLV.
+        Figure 1: The Snapshot Message wireformat, including the BMP
+                   Common Header and the Snapshot Id TLV.
 
    The Snapshot (Messages) can be generated by a BMP exporter or by a
    BMP station, as long as all required data for the Peer Up
    Notification and Route Monitoring messages pertaining to the Snapshot
    are available.  The Snapshot Message MUST be followed by those
    messages, with the Snapshot Id TLV attached to every message.
+   Finally, the end of the Snapshot is signalled by another Snapshot
+   Message.  An example flow of these messages is visualized in
+   Figure 2.
+
+     (End-of-)                                             (Start-of)
+
+   +----------+ +----------+ +----------+ +-------------+ +----------+
+   | Snapshot | | RouteMon | | RouteMon | | PeerUpNotif | | Snapshot |
+   +----------+ +----------+ +----------+ +-------------+ +----------+
+   |  Id TLV  | |          | |          | |             | |  Id TLV  |
+   +----------+ |          | |          | |             | +----------+
+                |          | |          | |             | | Meta TLV |
+                +~~~~~~~~~~+ +~~~~~~~~~~+ +~~~~~~~~~~~~~+ +----------+
+                |  Id TLV  | |  Id TLV  | |  Id TLV     | | Meta TLV |
+                +----------+ +----------+ +-------------+ +----------+
+   ------------------------------------------------------------------>
+
+   Exporting side                                         Station side
+
+     Figure 2: Flow of messages in a Snapshot, from exporter to station
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 7]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
 
 3.2.  Start-of-snapshot
 
@@ -386,14 +413,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    like all other messages comprising the Snapshot.  This Snapshot
    Message can also contain meta-data TLVs, most notably the Snapshot
    Error TLV.  If, for whatever reason, the sending side can not
-
-
-
-Hendriks, et al.          Expires 19 April 2026                 [Page 7]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
-
    complete the Snapshot, it MUST send a Snapshot Message containing a
    Snapshot Error TLV to signal the Snapshot is incomplete and/or
    incorrect.  For discussion on operational consequences, see
@@ -423,6 +442,14 @@ Internet-Draft                BMP Snapshots                 October 2025
    UTF-8 string of arbitrary length, describing the failure reason.
    Note that the Snapshot Error TLV is useful for live connections, but
    less so for offline data on persistent storage: as it's clear the
+
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 8]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    Snapshot is incorrect or incomplete, one would likely want to replace
    it with a valid Snapshot instead of archiving the incorrect one.
 
@@ -441,14 +468,6 @@ Internet-Draft                BMP Snapshots                 October 2025
          Length: 8 bytes
 
          Value: 64bit UNIX epoch, in seconds
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                 [Page 8]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
    *  Type = TBD5: Exporter IP address
 
@@ -480,6 +499,13 @@ Internet-Draft                BMP Snapshots                 October 2025
 
          Value: UTF-8 string
 
+
+
+Hendriks, et al.          Expires 19 April 2026                 [Page 9]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    *  Type = TBD10: Station sysDesc
 
          Length: variable, non-zero, describing the number of bytes
@@ -498,14 +524,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    *  Peer Up Notifications from a Snapshot will be interpreted as
       normal Peer Up Notifications, though for a peer that was already
       considered 'up'.  This situation is not explicitly described in
-
-
-
-Hendriks, et al.          Expires 19 April 2026                 [Page 9]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
-
       Section 3.3 of [RFC7854], and can be considered unexpected.  Even
       though application of Peer Up Notifications could be considered
       idempotent (the state after processing the message is 'this peer
@@ -536,6 +554,14 @@ Internet-Draft                BMP Snapshots                 October 2025
       be able to recognize Snapshot Id TLVs relatively easily.  With
       BMPv4, the BGP Update is carried in a TLV in the Route Monitoring
       message, so any implementation will be able to process TLVs to a
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 10]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
       certain extent.  It then only needs to be aware of the type code
       of the Snapshot Id TLV type: as all messages in a Snapshot will
       carry a TLV of this type, the implementation can simply skip/drop
@@ -553,14 +579,6 @@ Internet-Draft                BMP Snapshots                 October 2025
 
       Note that this approach also requires (minimal) changes to the
       receiving side, namely the recognition of such a flag.
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 10]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
 6.  Third party off-wire encoding formats
 
@@ -589,6 +607,17 @@ Internet-Draft                BMP Snapshots                 October 2025
    infer some things, it can not be used to rebuild a complete view of
    the network.
 
+
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 11]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
 7.2.  Snapshot Id scheme
 
    The generation and form of the Snapshot Ids introduced in this
@@ -607,16 +636,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    on an algorithm producing globally unique identifiers, e.g. UUID
    version 4, they all can send out Snapshots without possibly using an
    identical Snapshot Id generated by another exporter.
-
-
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 11]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
 7.2.2.  Increasing identifiers
 
@@ -648,6 +667,13 @@ Internet-Draft                BMP Snapshots                 October 2025
    considered if the station needs a full view on a regular basis, which
    is not necessary in typical deployments.
 
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 12]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    A timer-based approach could be a suitable approach for a station
    generating Snapshots and writing them to persistent storage, e.g.
    doing time-binned historical archiving.
@@ -663,16 +689,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    connected to the exporter, a re-establishing the TCP connection for
    the BMP stream might be a simpler and perhaps even cheaper
    alternative.
-
-
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 12]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
 7.3.3.  Out-of-band request via other protocols
 
@@ -707,6 +723,13 @@ Internet-Draft                BMP Snapshots                 October 2025
    interpretation.  Including EoRs in a Snapshot perhaps only adds to
    the confusion, and therefore leaving them out could be preferable.
 
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 13]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
 9.  Security Considerations
 
    It is not believed that this document adds any additional security
@@ -719,15 +742,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    a registry within the BMP group, named "BMP Snapshot Message TLVs".
 
    Registration procedures for this new registry are:
-
-
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 13]
-
-Internet-Draft                BMP Snapshots                 October 2025
 
 
    // Note that these have been adapted to the proposed ranges as
@@ -764,6 +778,14 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 11.1.  Normative References
 
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 14]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
               BGP Monitoring Protocol (BMP)", Work in Progress,
@@ -778,13 +800,6 @@ Internet-Draft                BMP Snapshots                 October 2025
               grow-bmp-tlv-18, 3 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
               bmp-tlv-18>.
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 14]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
    [I-D.petrie-grow-mrt-bmp]
               Petrie, C., "Storing BMP messages in MRT Format", Work in
@@ -817,6 +832,16 @@ Internet-Draft                BMP Snapshots                 October 2025
               DOI 10.17487/RFC2918, September 2000,
               <https://www.rfc-editor.org/info/rfc2918>.
 
+
+
+
+
+
+Hendriks, et al.          Expires 19 April 2026                [Page 15]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
 Acknowledgements
 
    TBD
@@ -829,17 +854,6 @@ Authors' Addresses
    1098 XH Amsterdam
    Netherlands
    Email: luuk@nlnetlabs.nl
-
-
-
-
-
-
-
-
-Hendriks, et al.          Expires 19 April 2026                [Page 15]
-
-Internet-Draft                BMP Snapshots                 October 2025
 
 
    Paolo Lucente
@@ -864,20 +878,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    3771 MT Barneveld
    Netherlands
    Email: colin@ntt.net
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
