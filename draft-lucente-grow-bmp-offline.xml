@@ -10,6 +10,7 @@
 <!ENTITY I-D.petrie-grow-mrt-bmp SYSTEM "https://bib.ietf.org/public/rfc/bibxml3/reference.I-D.petrie-grow-mrt-bmp.xml">
 <!ENTITY IANA_PS_MSG_TYPE "TBD1">
 <!ENTITY IANA_PS_SNAPSHOT_ID_TLV "TBD2">
+<!ENTITY IANA_PS_SNAPSHOT_ERROR_TLV "TBD3">
 ]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc strict="yes" ?>
@@ -360,10 +361,9 @@
           can also contain meta-data TLVs, most notably the Snapshot Error TLV.
           If, for whatever reason, the sending side can not complete the
           Snapshot, it MUST send a Snapshot Message containing a Snapshot Error
-          TLVs to signal the Snapshot is incomplete and/or incorrect. For
+          TLV to signal the Snapshot is incomplete and/or incorrect. For
           discussion on operational consequences, see
           <xref target="snapshot-error"/>.
-
         </t>
       </section>
     </section>
@@ -412,49 +412,49 @@
           have to rely on the filename or other external data to get these
           types of information. All TLVs are non-indexed.
           <list style="symbols"><t>
-            Type = TBD3: Datetime of snapshot
+            Type = TBD4: Datetime of snapshot
               <list style="empty"><t>
                 Length: 8 bytes
                   </t><t>
                   Value: 64bit UNIX epoch, in seconds
               </t></list>
               </t><t>
-              Type = TBD4: Exporter IP address
+              Type = TBD5: Exporter IP address
               <list style="empty"><t>
                 Length: 16 bytes
                   </t><t>
                   Value: IPv6 or IPv4-mapped IPv6 address
               </t></list>
               </t><t>
-              Type = TBD5: Exporter sysName
+              Type = TBD6: Exporter sysName
               <list style="empty"><t>
                 Length: variable, non-zero, describing the number of bytes
                   </t><t>
                   Value: UTF-8 string
               </t></list>
               </t><t>
-              Type = TBD6: Exporter sysDesc
+              Type = TBD7: Exporter sysDesc
               <list style="empty"><t>
                 Length: variable, non-zero, describing the number of bytes
                   </t><t>
                   Value: UTF-8 string
               </t></list>
               </t><t>
-              Type = TBD7: Station IP address
+              Type = TBD8: Station IP address
               <list style="empty"><t>
                 Length: variable, non-zero, describing the number of bytes
                   </t><t>
                   Value: IPv6 or IPv4-mapped IPv6 address
               </t></list>
               </t><t>
-              Type = TBD8: Station sysName
+              Type = TBD9: Station sysName
               <list style="empty"><t>
                 Length: variable, non-zero, describing the number of bytes
                   </t><t>
                   Value: UTF-8 string
               </t></list>
               </t><t>
-              Type = TBD9: Station sysDesc
+              Type = TBD10: Station sysDesc
               <list style="empty"><t>
                 Length: variable, non-zero, describing the number of bytes
                   </t><t>
@@ -698,11 +698,11 @@
       </t>
       <texttable>
         <ttcol align="center">
-      Range
-    </ttcol>
+          Range
+        </ttcol>
         <ttcol align="center">
-      Registration Procedures
-    </ttcol>
+          Registration Procedures
+        </ttcol>
         <c>0-16383</c>
         <c>Standards Action</c>
         <c>16384-32767</c>
@@ -721,16 +721,19 @@
       </t>
       <texttable>
         <ttcol align="center">
-      Type
-    </ttcol>
+          Type
+        </ttcol>
         <ttcol align="center">
-      Description
-    </ttcol>
+          Description
+        </ttcol>
         <ttcol align="center">
-      Reference
-    </ttcol>
+          Reference
+        </ttcol>
         <c>&IANA_PS_SNAPSHOT_ID_TLV;</c>
         <c>Snapshot Id</c>
+        <c>this document</c>
+        <c>&IANA_PS_SNAPSHOT_ERROR_TLV;</c>
+        <c>Snapshot Error</c>
         <c>this document</c>
       </texttable>
     </section>
