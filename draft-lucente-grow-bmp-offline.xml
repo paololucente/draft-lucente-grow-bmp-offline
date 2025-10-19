@@ -155,9 +155,9 @@
       are in-protocol and do not rely on any specific characteristic of either
       exporter or station.
       However, as the process of emitting a Snapshot can presumably be
-      expensive, it is not to be expected that BMP export implementations on
+      expensive, it is not to be expected that BMP exporter implementations on
       routers will support the concepts introduced in this document. A BMP
-      station on the other hand likely has more resources available, and will
+      station on the other hand, likely has more resources available and will
       have received all the necessary information (in terms of session state and
       RIB contents) from the router already. To not burden limited routers
       more than necessary, the authors assume the 'first' BMP station implements
@@ -212,7 +212,7 @@
                 <tr><td>Expensive</td>                <td>y</td><td>Less</td></tr>
 
                 <tr><td colspan="3">Protocol requirement:</td></tr>
-                <tr><td>New mesage type or TLV</td>   <td>both</td><td>either</td></tr>
+                <tr><td>New message type or TLV</td>   <td>both</td><td>either</td></tr>
         </tbody>
         </table>
     </section>
@@ -288,8 +288,8 @@
     </section>
     <section title="Snapshot Message" anchor="snapshot-message">
       <t>
-      Every Snapshot contains exactly two messages of the Snapshot type: one
-      preceding all the Peer Up Notifications and Route Monitoring messages
+      Every Snapshot contains exactly two messages of the Snapshot Message type: one
+      Snapshot Message preceding all the Peer Up Notifications and Route Monitoring messages
       containing the actual data, and one Snapshot Message to signal the end.
       Both follow the same wireformat.
       </t>
@@ -497,21 +497,22 @@ Exporting side                                         Station side
         </section>
       <section title="Start-of-snapshot">
         <t>
-          The Snapshot Message preceding all other messages in the Snapshot
-          should contain TLVs providing useful metadata for the consumer of the
-          Snapshot. For example, the timestamp of snapshot generation, and
-          information about the exporter (IP address, software version).
-          Furthermore, they can describe which address families are included
-          in the snapshot, and for which RIB views (e.g. Adj-RIB-In Pre-policy).
-          Note that, as all meta-data TLVs are optional, a consumer of snapshots
-          should never rely on presence of any of these TLVs.
+          The Snapshot Message preceding all other messages in the Snapshot MUST
+          contain the Snapshot Id TLV, and should also contain TLVs providing
+          useful metadata for the consumer of the Snapshot. For example, the
+          timestamp of snapshot generation, and information about the exporter
+          (IP address, software version). Furthermore, they can describe which
+          address families are included in the snapshot, and for which RIB views
+          (e.g. Adj-RIB-In Pre-policy). Note that, as all meta-data TLVs are
+          optional, a consumer of snapshots should never rely on presence of any
+          of these TLVs.
         </t>
       </section>
       <section title="End-of-snapshot">
         <t>
           After all Peer Up Notification and Route Monitoring messages of the
           Snapshot, the end of the Snapshot is signalled by means of another
-          Snapshot Message. This Snapshot Message contains the Snapshot Id TLV
+          Snapshot Message. This Snapshot Message MUST contain the Snapshot Id TLV
           like all other messages comprising the Snapshot. This Snapshot Message
           can also contain meta-data TLVs, most notably the Snapshot Error TLV.
           If, for whatever reason, the sending side can not complete the
@@ -622,11 +623,11 @@ Exporting side                                         Station side
   <section title="Backwards (in)compatibility">
     <t>
       If an implementation lacking support for Snapshots receives a Snapshot, it
-      should ignore the Snapshot Messages and the Snapshot Id TLVs, as
-      these are all optional. However, this reduces a Snapshot to a bunch of
-      Peer Up Notification and Route Monitoring messages indistinguishable from
-      'normal' Peer Up Notification and Route Monitoring messages. This
-      introduces the following problems:
+      should ignore the Snapshot Messages and the Snapshot Id TLVs, as these are
+      all optional. However, this reduces a Snapshot to a set of Peer Up
+      Notification and Route Monitoring messages indistinguishable from 'normal'
+      Peer Up Notification and Route Monitoring messages. This introduces the
+      following problems:
       <list style="symbols">
         <t>
           Peer Up Notifications from a Snapshot will be interpreted as normal
