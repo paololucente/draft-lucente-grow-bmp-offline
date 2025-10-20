@@ -903,6 +903,14 @@ Exporting side                                         Station side
         <c>Snapshot Error</c>
         <c>this document</c>
       </texttable>
+      <t>
+        IANA is also asked to allocate codepoints for the Snapshot Id TLVs in
+        the BMP Peer Up Message TLV registery and the BMP Route Monitoring TLV
+        registery. Considering the Snapshot Id TLV then appears in three
+        registries, ideally the same codepoint is allocated in all registries.
+        However, this will not be possible without introducing gaps in the
+        registries, which might be undesirable.
+      </t>
     </section>
   </middle>
   <back>
