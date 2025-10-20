@@ -6,9 +6,9 @@ Global Routing Operations                                    L. Hendriks
 Internet-Draft                                                NLnet Labs
 Updates: 7854 (if approved)                                   P. Lucente
 Intended status: Standards Track                              C. Cardona
-Expires: 22 April 2026                                         C. Petrie
+Expires: 23 April 2026                                         C. Petrie
                                                                      NTT
-                                                         19 October 2025
+                                                         20 October 2025
 
 
                              BMP Snapshots
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 April 2026.
+   This Internet-Draft will expire on 23 April 2026.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 1]
+Hendriks, et al.          Expires 23 April 2026                 [Page 1]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -96,9 +96,9 @@ Table of Contents
      8.1.  No EoRs in Snapshots  . . . . . . . . . . . . . . . . . .  13
    9.  Security Considerations . . . . . . . . . . . . . . . . . . .  14
    10. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
-   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     11.1.  Normative References . . . . . . . . . . . . . . . . . .  14
-     11.2.  Informative References . . . . . . . . . . . . . . . . .  15
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .  15
+     11.2.  Informative References . . . . . . . . . . . . . . . . .  16
    Acknowledgements  . . . . . . . . . . . . . . . . . . . . . . . .  16
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  16
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 2]
+Hendriks, et al.          Expires 23 April 2026                 [Page 2]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -165,7 +165,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 3]
+Hendriks, et al.          Expires 23 April 2026                 [Page 3]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -221,7 +221,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 4]
+Hendriks, et al.          Expires 23 April 2026                 [Page 4]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -277,7 +277,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 5]
+Hendriks, et al.          Expires 23 April 2026                 [Page 5]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -333,7 +333,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 6]
+Hendriks, et al.          Expires 23 April 2026                 [Page 6]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -389,7 +389,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 7]
+Hendriks, et al.          Expires 23 April 2026                 [Page 7]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -402,7 +402,7 @@ Internet-Draft                BMP Snapshots                 October 2025
    example, the timestamp of snapshot generation, and information about
    the exporter (IP address, software version).  Furthermore, they can
    describe which address families are included in the snapshot, and for
-   which RIB views (e.g.  Adj-RIB-In Pre-policy).  Note that, as all
+   which RIB views (e.g. Adj-RIB-In Pre-policy).  Note that, as all
    meta-data TLVs are optional, a consumer of snapshots should never
    rely on presence of any of these TLVs.
 
@@ -445,7 +445,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 8]
+Hendriks, et al.          Expires 23 April 2026                 [Page 8]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -501,7 +501,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                 [Page 9]
+Hendriks, et al.          Expires 23 April 2026                 [Page 9]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -557,7 +557,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                [Page 10]
+Hendriks, et al.          Expires 23 April 2026                [Page 10]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -613,7 +613,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                [Page 11]
+Hendriks, et al.          Expires 23 April 2026                [Page 11]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -633,7 +633,7 @@ Internet-Draft                BMP Snapshots                 October 2025
    vantage points, unique Snapshot Ids might prove handy or even crucial
    in order to distinguish Snapshot A originally sent by BMP exporter X,
    from Snapshot B sent by exporter Y.  If all exporting processes rely
-   on an algorithm producing globally unique identifiers, e.g.  UUID
+   on an algorithm producing globally unique identifiers, e.g. UUID
    version 4, they all can send out Snapshots without possibly using an
    identical Snapshot Id generated by another exporter.
 
@@ -669,7 +669,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                [Page 12]
+Hendriks, et al.          Expires 23 April 2026                [Page 12]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -711,10 +711,10 @@ Internet-Draft                BMP Snapshots                 October 2025
    initial synchronisation at the start of a BMP session, there is a
    discrepancy, as the Snapshot does not include EoRs to signal a RIB
    (view) has been fully sent.  An EoR in this context is a
-   RouteMonitoring message for a certain RIB view (e.g.  Adj-RIB-In
-   Post-policy, as defined by the flags in the Per Peer Header),
-   containing a BGP Update for a certain address family with no
-   announcements and no withdrawals.
+   RouteMonitoring message for a certain RIB view (e.g. Adj-RIB-In Post-
+   policy, as defined by the flags in the Per Peer Header), containing a
+   BGP Update for a certain address family with no announcements and no
+   withdrawals.
 
    With the Snapshot Message signalling end-of-snapshot, the EoRs are
    not a necessity.  One reason for inclusion would be consistency,
@@ -725,7 +725,7 @@ Internet-Draft                BMP Snapshots                 October 2025
 
 
 
-Hendriks, et al.          Expires 22 April 2026                [Page 13]
+Hendriks, et al.          Expires 23 April 2026                [Page 13]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
@@ -774,17 +774,28 @@ Internet-Draft                BMP Snapshots                 October 2025
 
                                   Table 3
 
-11.  References
-
-11.1.  Normative References
 
 
 
 
-Hendriks, et al.          Expires 22 April 2026                [Page 14]
+
+
+
+Hendriks, et al.          Expires 23 April 2026                [Page 14]
 
 Internet-Draft                BMP Snapshots                 October 2025
 
+
+   IANA is also asked to allocate codepoints for the Snapshot Id TLVs in
+   the BMP Peer Up Message TLV registery and the BMP Route Monitoring
+   TLV registery.  Considering the Snapshot Id TLV then appears in three
+   registries, ideally the same codepoint is allocated in all
+   registries.  However, this will not be possible without introducing
+   gaps in one or multiple registries, which might be undesirable.
+
+11.  References
+
+11.1.  Normative References
 
    [I-D.ietf-grow-bmp-rel]
               Lucente, P. and C. Cardona, "Logging of routing events in
@@ -797,9 +808,9 @@ Internet-Draft                BMP Snapshots                 October 2025
               Lucente, P. and Y. Gu, "BMP v4: TLV Support for BGP
               Monitoring Protocol (BMP) Route Monitoring and Peer Down
               Messages", Work in Progress, Internet-Draft, draft-ietf-
-              grow-bmp-tlv-19, 10 October 2025,
+              grow-bmp-tlv-18, 3 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-grow-
-              bmp-tlv-19>.
+              bmp-tlv-18>.
 
    [I-D.petrie-grow-mrt-bmp]
               Petrie, C., "Storing BMP messages in MRT Format", Work in
@@ -822,6 +833,15 @@ Internet-Draft                BMP Snapshots                 October 2025
               DOI 10.17487/RFC7854, June 2016,
               <https://www.rfc-editor.org/info/rfc7854>.
 
+
+
+
+
+Hendriks, et al.          Expires 23 April 2026                [Page 15]
+
+Internet-Draft                BMP Snapshots                 October 2025
+
+
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
@@ -831,16 +851,6 @@ Internet-Draft                BMP Snapshots                 October 2025
    [RFC2918]  Chen, E., "Route Refresh Capability for BGP-4", RFC 2918,
               DOI 10.17487/RFC2918, September 2000,
               <https://www.rfc-editor.org/info/rfc2918>.
-
-
-
-
-
-
-Hendriks, et al.          Expires 22 April 2026                [Page 15]
-
-Internet-Draft                BMP Snapshots                 October 2025
-
 
 Acknowledgements
 
@@ -883,14 +893,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-
-
-
-Hendriks, et al.          Expires 22 April 2026                [Page 16]
+Hendriks, et al.          Expires 23 April 2026                [Page 16]
